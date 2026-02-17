@@ -1,5 +1,6 @@
 package com.gotrip.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,6 +25,7 @@ public class AdminProfile {
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
     @OnDelete(action = OnDeleteAction.SET_NULL) // onDelete: SetNull
+    @JsonBackReference
     private User user;
 
     // --- Auditing Fields ---
@@ -35,7 +37,4 @@ public class AdminProfile {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    public void setUser(User user) {
-        this.user = user;
-    }
 }

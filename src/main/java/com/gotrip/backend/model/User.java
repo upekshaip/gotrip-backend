@@ -1,18 +1,21 @@
 package com.gotrip.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Entity
-@Getter
 @Setter
+@Getter
 @Table(name = "users")
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -31,8 +34,7 @@ public class User {
     @Column(length = 10) // e.g., MALE, FEMALE
     private String gender;
 
-    @Column(columnDefinition = "DATE") // Matches @db.Date
-    private String dob;
+    private LocalDate dob;
 
     @Column(length = 255)
     private String password;
@@ -49,20 +51,27 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    private boolean traveller = false;
 
-    private boolean isTraveller = false;
-    private boolean isServiceProvider = false;
-    private boolean isAdmin = false;
+    @Column(nullable = false)
+    private boolean serviceProvider = false;
+
+    @Column(nullable = false)
+    private boolean admin = false;
 
     // Relationships
     // We removed CascadeType.ALL because we want the Profiles to survive User deletion
     @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonManagedReference
     private TravellerProfile travellerProfile;
 
     @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonManagedReference
     private ServiceProviderProfile serviceProviderProfile;
 
     @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonManagedReference
     private AdminProfile adminProfile;
 
     // Lifecycle method for "Set Null" logic

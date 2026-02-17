@@ -16,7 +16,7 @@ public class HomeController {
     };
 
 
-    @RequestMapping("/hello")
+    @RequestMapping("/")
     public Map<String, Object> hello() {
         System.out.println("Hello World");
         return Map.of(
@@ -27,14 +27,4 @@ public class HomeController {
                 )
         );
     }
-
-
-    @RequestMapping("/env")
-    public Map<String, String> getEnv() {
-        return Map.of(
-        "db", appConfig.dbUrl()
-        );
-    }
-
-
 }

@@ -1,5 +1,6 @@
 package com.gotrip.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,9 +22,11 @@ public class ServiceProviderProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long providerId; // Independent ID to match Prisma's 'teacherId' logic
 
+    // Manual setter (Lombok @Setter handles this, but keeping it as requested)
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
     @OnDelete(action = OnDeleteAction.SET_NULL) // This handles the DB-level 'onDelete: SetNull'
+    @JsonBackReference
     private User user;
 
     @Column(length = 100)
@@ -47,8 +50,4 @@ public class ServiceProviderProfile {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // Manual setter (Lombok @Setter handles this, but keeping it as requested)
-    public void setUser(User user) {
-        this.user = user;
-    }
 }

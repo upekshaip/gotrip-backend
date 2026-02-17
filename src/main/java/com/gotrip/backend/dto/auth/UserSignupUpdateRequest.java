@@ -1,6 +1,6 @@
 package com.gotrip.backend.dto.auth;
 
-public record UserUpdateRequest(
+public record UserSignupUpdateRequest(
         String name,
         String gender,
         String dob,

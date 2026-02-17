@@ -66,7 +66,7 @@ public class SignupService {
     }
 
     @Transactional
-    public User login(UserLoginRequest request) {
+    public Map<String, Object> login(UserLoginRequest request) {
         Optional<User> myUser = userRepository.findByEmail(request.email());
         if (myUser.isEmpty()) {
             throw new RuntimeException("Invalid email or password");
@@ -76,6 +76,21 @@ public class SignupService {
         if (!isMatch) {
             throw new RuntimeException("Invalid email or password");
         }
-        return user;
+
+        // log user in
+        Map<String, Object> refreshToken = jWTService.generateRefreshToken();
+
+        user.setRefreshToken(refreshToken.get("token").toString());
+        user.setRefreshTokenExpiry((LocalDateTime) refreshToken.get("expiration"));
+
+        User createdUser = userRepository.save(user);
+        String accessToken = jWTService.generateAccessToken(createdUser);
+        // update user
+        return Map.of(
+                "user", createdUser,
+                "accessToken", accessToken,
+                "refreshToken", refreshToken.get("token"),
+                "refreshExpiration", refreshToken.get("expiration")
+        );
     }
 }

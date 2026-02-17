@@ -72,11 +72,26 @@ public class SignupController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody UserLoginRequest request, HttpServletResponse response) {
         try {
-            User loginUser = signupService.login(request);
-            return new ResponseEntity<>(loginUser, HttpStatus.OK);
-        } catch (RuntimeException e) {
+            Map<String, Object> loginData = signupService.login(request);
+
+            Cookie accessCookie = new Cookie("accessToken", loginData.get("accessToken").toString());;
+            accessCookie.setPath("/");
+            accessCookie.setMaxAge(AppConfig.ACCESS_TOKEN_EXPIRATION); // 5 mins
+            accessCookie.setHttpOnly(false);
+            response.addCookie(accessCookie);
+
+            Cookie refreshCookie = new Cookie("jwt", loginData.get("refreshToken").toString());
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setSecure(true); // Only for HTTPS
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge((int) (AppConfig.REFRESH_TOKEN_EXPIRATION));
+            response.addCookie(refreshCookie);
+
+            return ResponseEntity.status(HttpStatus.OK).body(loginData.get("user"));
+
+        } catch (Exception e) {
             ApiErrorResponse error = new ApiErrorResponse(
                     e.getMessage(),
                     HttpStatus.BAD_REQUEST.value(),

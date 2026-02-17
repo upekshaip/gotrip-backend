@@ -37,6 +37,7 @@ public class SignupService {
 
         User user = new User();
         user.setEmail(request.email());
+
         user.setPassword(request.password());
         user.setTraveller(true);
         user.setAdmin(false);
@@ -49,15 +50,15 @@ public class SignupService {
         travellerProfile.setUser(user);
         user.setTravellerProfile(travellerProfile);
 
-        String accessToken = jWTService.generateAccessToken(user);
         Map<String, Object> refreshToken = jWTService.generateRefreshToken();
-
         user.setRefreshToken(refreshToken.get("token").toString());
         user.setRefreshTokenExpiry((LocalDateTime) refreshToken.get("expiration"));
 
-        var created = userRepository.save(user);
+        User createdUser = userRepository.save(user);
+        String accessToken = jWTService.generateAccessToken(createdUser);
+
         return Map.of(
-                "user", created,
+                "user", createdUser,
                 "accessToken", accessToken,
                 "refreshToken", refreshToken.get("token"),
                 "refreshExpiration", refreshToken.get("expiration")

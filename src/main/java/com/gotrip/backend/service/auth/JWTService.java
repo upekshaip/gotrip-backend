@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
@@ -28,23 +29,14 @@ public class JWTService {
 
     // Generate Token with FilteredUser data
     public String generateAccessToken(User user) {
+        try {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString = mapper.writeValueAsString(user);
+
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getUserId());
-        claims.put("name", user.getName());
-        claims.put("admin", user.isAdmin());
-        claims.put("traveller", user.isTraveller());
-        claims.put("serviceProvider", user.isServiceProvider());
         claims.put("email", user.getEmail());
-        claims.put("phone", user.getPhone());
-        claims.put("gender", user.getGender());
-        claims.put("adminProfile", user.getAdminProfile());
-        claims.put("serviceProviderProfile", user.getServiceProviderProfile());
-        claims.put("travellerProfile", user.getTravellerProfile());
-        claims.put("dob", user.getDob());
-        claims.put("createdAt", user.getCreatedAt());
-        claims.put("updatedAt", user.getUpdatedAt());
-        claims.put("refreshTokenExpiry", user.getRefreshTokenExpiry());
-
+        claims.put("user", jsonString);
 
         return Jwts.builder()
                 .claims(claims)
@@ -53,7 +45,9 @@ public class JWTService {
                 .expiration(new Date(System.currentTimeMillis() + AppConfig.ACCESS_TOKEN_EXPIRATION * 1000))
                 .signWith(getSigningKey())
                 .compact();
-    }
+    } catch (Exception e) {
+        throw new RuntimeException("Error serializing user to JWT", e);
+    }}
 
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);

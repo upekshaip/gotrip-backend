@@ -7,14 +7,10 @@ import java.util.Map;
 
 
 @RestController
-public class HomeController {
+public class ExampleController {
 
-    private final AppConfig appConfig;
-
-    private HomeController(AppConfig appConfig) {
-        this.appConfig = appConfig;
+    private ExampleController(AppConfig appConfig) {
     };
-
 
     @RequestMapping("/")
     public Map<String, Object> hello() {

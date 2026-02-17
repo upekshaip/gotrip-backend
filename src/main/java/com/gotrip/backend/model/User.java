@@ -42,6 +42,8 @@ public class User {
     @Column(columnDefinition = "TEXT") // Matches @db.Text
     private String refreshToken;
 
+    private LocalDateTime refreshTokenExpiry;
+
     // --- Auditing Fields ---
     @CreatedDate
     @Column(nullable = false, updatable = false)

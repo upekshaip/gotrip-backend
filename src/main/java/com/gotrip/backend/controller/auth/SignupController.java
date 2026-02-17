@@ -1,13 +1,20 @@
 package com.gotrip.backend.controller.auth;
 
 
+import com.gotrip.backend.config.AppConfig;
+import com.gotrip.backend.dto.auth.UserLoginRequest;
 import com.gotrip.backend.dto.auth.UserSignupRequest;
+import com.gotrip.backend.dto.auth.UserSignupUpdateRequest;
 import com.gotrip.backend.dto.error.ApiErrorResponse;
 import com.gotrip.backend.model.User;
 import com.gotrip.backend.service.auth.SignupService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -15,15 +22,60 @@ public class SignupController {
 
     private final SignupService signupService;
 
+
     public SignupController(SignupService signupService) {
         this.signupService = signupService;
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody UserSignupRequest request) {
+    public ResponseEntity<?> signUp(@RequestBody UserSignupRequest request, HttpServletResponse response) {
         try {
-            User createdUser = signupService.signUp(request);
-            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+            Map<String, Object> signupData = signupService.signUp(request);
+            Cookie accessCookie = new Cookie("accessToken", signupData.get("accessToken").toString());;
+            accessCookie.setPath("/");
+            accessCookie.setMaxAge(AppConfig.ACCESS_TOKEN_EXPIRATION); // 5 mins
+             accessCookie.setHttpOnly(false);
+            response.addCookie(accessCookie);
+
+            Cookie refreshCookie = new Cookie("jwt", signupData.get("refreshToken").toString());
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setSecure(true); // Only for HTTPS
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge((int) (AppConfig.REFRESH_TOKEN_EXPIRATION));
+            response.addCookie(refreshCookie);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(signupData.get("user"));
+
+        } catch (RuntimeException e) {
+            ApiErrorResponse error = new ApiErrorResponse(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    System.currentTimeMillis()
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    @PatchMapping("/signup")
+    public ResponseEntity<?> signUpUpdate(@RequestBody UserSignupUpdateRequest request) {
+        try {
+            // logic
+            return ResponseEntity.status(HttpStatus.CREATED).body("signup update request");
+        } catch (RuntimeException e) {
+            ApiErrorResponse error = new ApiErrorResponse(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    System.currentTimeMillis()
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserLoginRequest request) {
+        try {
+            User loginUser = signupService.login(request);
+            return new ResponseEntity<>(loginUser, HttpStatus.OK);
         } catch (RuntimeException e) {
             ApiErrorResponse error = new ApiErrorResponse(
                     e.getMessage(),

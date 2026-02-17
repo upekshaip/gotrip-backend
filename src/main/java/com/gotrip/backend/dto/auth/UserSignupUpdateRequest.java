@@ -4,6 +4,5 @@ public record UserSignupUpdateRequest(
         String name,
         String gender,
         String dob,
-        String phone,
-        String address
+        String phone
 ) {}

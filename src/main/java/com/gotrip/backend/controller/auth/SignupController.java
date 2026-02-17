@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -57,11 +58,18 @@ public class SignupController {
     }
 
     @PatchMapping("/signup")
-    public ResponseEntity<?> signUpUpdate(@RequestBody UserSignupUpdateRequest request) {
+    public ResponseEntity<?> signUpUpdate(Authentication authentication, @RequestBody UserSignupUpdateRequest request, HttpServletResponse response) {
         try {
-            // logic
-            return ResponseEntity.status(HttpStatus.CREATED).body("signup update request");
-        } catch (RuntimeException e) {
+            Map<String, Object> updatedData = signupService.signupUpdate(authentication, request);
+
+            Cookie accessCookie = new Cookie("accessToken", updatedData.get("accessToken").toString());;
+            accessCookie.setPath("/");
+            accessCookie.setMaxAge(AppConfig.ACCESS_TOKEN_EXPIRATION); // 5 mins
+            accessCookie.setHttpOnly(false);
+            response.addCookie(accessCookie);
+            return ResponseEntity.status(HttpStatus.CREATED).body(updatedData.get("user"));
+
+        } catch (Exception e) {
             ApiErrorResponse error = new ApiErrorResponse(
                     e.getMessage(),
                     HttpStatus.BAD_REQUEST.value(),

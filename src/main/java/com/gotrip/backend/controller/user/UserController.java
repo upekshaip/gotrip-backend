@@ -19,7 +19,6 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<?> getMyDetails(Authentication authentication) {
         try {
-
         if (authentication == null) {
            throw new Exception("Authorization is null");
         }

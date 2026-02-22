@@ -28,6 +28,36 @@ public class SignupController {
         this.signupService = signupService;
     }
 
+    @GetMapping("/refresh")
+    public ResponseEntity<?> refresh
+            (@CookieValue(name = "jwt", required = false) String refreshToken,
+             HttpServletResponse response) {
+        try {
+//            refresh token handler
+            if (refreshToken == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UNAUTHORIZED");
+            }
+            Map<String, Object> accessToken = signupService.refresh(refreshToken);
+
+//            modify the accessToken
+            Cookie accessCookie = new Cookie("accessToken", accessToken.get("accessToken").toString());;
+            accessCookie.setPath("/");
+            accessCookie.setMaxAge(AppConfig.ACCESS_TOKEN_EXPIRATION); // 5 mins
+            accessCookie.setHttpOnly(false);
+            response.addCookie(accessCookie);
+
+            return ResponseEntity.ok(accessToken);
+        }
+        catch (Exception e) {
+            ApiErrorResponse error = new ApiErrorResponse(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    System.currentTimeMillis()
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@RequestBody UserSignupRequest request, HttpServletResponse response) {
         try {

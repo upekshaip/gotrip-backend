@@ -1,6 +1,7 @@
 package com.gotrip.backend.service.auth;
 
 
+import com.gotrip.backend.config.AppConfig;
 import com.gotrip.backend.dto.auth.UserLoginRequest;
 import com.gotrip.backend.dto.auth.UserSignupRequest;
 import com.gotrip.backend.dto.auth.UserSignupUpdateRequest;
@@ -123,5 +124,22 @@ public class SignupService {
                 "refreshToken", refreshToken.get("token"),
                 "refreshExpiration", refreshToken.get("expiration")
         );
+    }
+
+    public Map<String, Object> refresh(String refreshToken) {
+        Optional<User> myUser = userRepository.findByRefreshToken(refreshToken);
+        if (myUser.isEmpty()) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+        User user = myUser.get();
+        LocalDateTime _exp = user.getRefreshTokenExpiry();
+        LocalDateTime  _now = LocalDateTime.now();
+        boolean _valid = _now.isBefore(_exp);
+        if (!_valid) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        String accessToken = jWTService.generateAccessToken(user);
+        return Map.of("accessToken", accessToken);
     }
 }

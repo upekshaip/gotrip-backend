@@ -30,18 +30,18 @@ public class JWTService {
     }
 
     // Now uses UserResponseDTO so it can work in Auth-Service without a DB
-    public String generateAccessToken(UserResponseDTO user) {
+    public String generateAccessToken(Long userId, String email, String user) {
         try {
             String userJson = objectMapper.writeValueAsString(user);
 
             Map<String, Object> claims = new HashMap<>();
-            claims.put("userId", user.userId());
-            claims.put("email", user.email());
+            claims.put("userId", userId);
+            claims.put("email", email);
             claims.put("user", userJson); // Storing serialized DTO for the filter to read
 
             return Jwts.builder()
                     .claims(claims)
-                    .subject(user.email())
+                    .subject(email)
                     .issuedAt(new Date(System.currentTimeMillis()))
                     .expiration(new Date(System.currentTimeMillis() + AppConfig.ACCESS_TOKEN_EXPIRATION * 1000))
                     .signWith(getSigningKey())

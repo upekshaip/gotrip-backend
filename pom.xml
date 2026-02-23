@@ -22,8 +22,8 @@
     <modules>
         <module>common-library</module>
         <module>discovery-server</module>
-        <module>auth-service</module>
         <module>user-service</module>
+        <module>my-gateway</module>
     </modules>
 
     <dependencyManagement>

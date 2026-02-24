@@ -1,30 +1,22 @@
 package com.gotrip.common_library.security;
 
-import com.gotrip.common_library.filter.JwtAuthenticationFilter;
+import com.gotrip.common_library.filter.CommonIdentityFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import tools.jackson.databind.ObjectMapper;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final CommonIdentityFilter commonIdentityFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
-        this.jwtAuthFilter = jwtAuthFilter;
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        // 1. Tell Jackson NOT to treat dates as complex numeric arrays
-//        mapper.conconfigure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        return mapper;
+    public SecurityConfig(CommonIdentityFilter commonIdentityFilter) {
+        this.commonIdentityFilter = commonIdentityFilter;
     }
 
     @Bean
@@ -37,12 +29,11 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/user/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/auth/**").permitAll() // Login/Signup
+                        .anyRequest().authenticated()           // Everything else needs the header
                 )
-                // ADD THIS LINE:
-                .addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+                // Use the new header-based identity filter
+                .addFilterBefore(commonIdentityFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

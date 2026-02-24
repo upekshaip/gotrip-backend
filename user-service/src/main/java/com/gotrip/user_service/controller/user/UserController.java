@@ -7,14 +7,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
-    public UserController(UserRepository userRepository) {
+    private final ObjectMapper objectMapper;
+
+    public UserController(UserRepository userRepository, ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping("/me")

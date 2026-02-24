@@ -43,7 +43,7 @@ public class JWTService {
                     .claims(claims)
                     .subject(email)
                     .issuedAt(new Date(System.currentTimeMillis()))
-                    .expiration(new Date(System.currentTimeMillis() + AppConfig.ACCESS_TOKEN_EXPIRATION * 1000))
+                    .expiration(new Date(System.currentTimeMillis() + AppConfig.ACCESS_TOKEN_EXPIRATION * 1000L))
                     .signWith(getSigningKey())
                     .compact();
         } catch (Exception e) {

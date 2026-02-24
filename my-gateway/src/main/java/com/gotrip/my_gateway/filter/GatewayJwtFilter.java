@@ -56,8 +56,7 @@ public class GatewayJwtFilter implements GlobalFilter, Ordered {
         // 2. Check for Authorization Header
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            throw new RuntimeException("Invalid JWT Token");
         }
 
         String token = authHeader.substring(7);
@@ -65,11 +64,12 @@ public class GatewayJwtFilter implements GlobalFilter, Ordered {
             // 3. Extract the "user" claim (JSON string) using your JWTService
             String userJson = jwtService.extractClaim(token, claims -> claims.get("user", String.class));
             String email = jwtService.extractEmail(token);
-            System.out.println("request from: " + email);
 
             if (userJson == null || email == null) {
                 throw new RuntimeException("Invalid token payload");
             }
+
+            System.out.println("request from: " + email);
 
             // 4. Mutate the request to add the 'x-user' header
             // This header will now be available to all downstream services (User-Service, Trip-Service, etc.)

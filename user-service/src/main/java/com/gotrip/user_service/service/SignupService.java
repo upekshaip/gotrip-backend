@@ -5,6 +5,7 @@ package com.gotrip.user_service.service;
 import com.gotrip.common_library.dto.auth.UserLoginRequest;
 import com.gotrip.common_library.dto.auth.UserSignupRequest;
 import com.gotrip.common_library.dto.auth.UserSignupUpdateRequest;
+import com.gotrip.common_library.dto.user.UserProfileUpdateRequest;
 import com.gotrip.common_library.service.JWTService;
 import com.gotrip.user_service.model.TravellerProfile;
 import com.gotrip.user_service.model.User;
@@ -148,5 +149,51 @@ public class SignupService {
         String userJson = objectMapper.writeValueAsString(user);
         String accessToken = jWTService.generateAccessToken(user.getUserId(), user.getEmail(), userJson);
         return Map.of("accessToken", accessToken);
+    }
+
+    // Inside SignupService.java
+
+    @Transactional
+    public Map<String, Object> updateProfile(Authentication auth, UserProfileUpdateRequest request) throws Exception {
+        if (auth == null) throw new Exception("Authorization is null");
+
+        // Extract user details from JWT principal
+        Map<String, Object> userDetails = (Map<String, Object>) auth.getPrincipal();
+        User user = userRepository.findByEmail(userDetails.get("email").toString())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Update fields if they are provided in the request
+        if (request.name() != null) user.setName(request.name());
+        if (request.phone() != null) user.setPhone(request.phone());
+        if (request.gender() != null) user.setGender(request.gender());
+        if (request.dob() != null) {
+            user.setDob(LocalDate.parse(request.dob()));
+        }
+
+        User updatedUser = userRepository.save(user);
+
+        // Regenerate Access Token so the frontend has the latest user data in the JWT
+        String userJson = objectMapper.writeValueAsString(updatedUser);
+        String accessToken = jWTService.generateAccessToken(updatedUser.getUserId(), updatedUser.getEmail(), userJson);
+
+        return Map.of(
+            "user", updatedUser,
+            "accessToken", accessToken
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public User getFullProfile(Authentication auth) throws Exception {
+        if (auth == null) {
+            throw new Exception("Authorization is null");
+        }
+
+        // Extract email from the JWT principal
+        Map<String, Object> userDetails = (Map<String, Object>) auth.getPrincipal();
+        String email = userDetails.get("email").toString();
+
+        // Fetch from DB to get the most recent data and relations
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 }

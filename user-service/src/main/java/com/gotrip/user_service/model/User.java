@@ -1,5 +1,6 @@
 package com.gotrip.user_service.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -36,9 +37,11 @@ public class User {
 
     private LocalDate dob;
 
+    @JsonIgnore
     @Column(length = 255)
     private String password;
 
+    @JsonIgnore
     @Column(columnDefinition = "TEXT") // Matches @db.Text
     private String refreshToken;
 

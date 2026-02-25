@@ -6,12 +6,35 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Arrays;
+
 
 @Configuration
 public class GatewayConfig {
     @Bean
     public JWTService jwtService() {
         return new JWTService();
+    }
+
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+
+        // allowNextJsFrontend
+        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        corsConfig.setAllowedHeaders(Arrays.asList("*"));
+        corsConfig.setAllowCredentials(true);
+        corsConfig.setMaxAge(3600L);
+
+        // This source MUST be the reactive version to be accepted by CorsWebFilter
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+        return new CorsWebFilter(source);
     }
 
     @Bean
@@ -25,5 +48,7 @@ public class GatewayConfig {
                         .uri("lb://user-service"))
                 .build();
     }
+
+
 }
 

@@ -49,39 +49,42 @@ public class GatewayJwtFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         String method = exchange.getRequest().getMethod().name();
 
-        // 1. Skip validation for Auth endpoints (Signup/Login)
-        if ((path.equals("/auth/login") && method.equals("POST")) ||
-                (path.equals("/auth/signup") && method.equals("POST"))) {
+        // 1. Skip validation for Auth endpoints (Signup/Login/refresh)
+        if (
+                (path.equals("/auth/login") && method.equals("POST")) ||
+                (path.equals("/auth/signup") && method.equals("POST")) ||
+                (path.equals("/auth/refresh") && method.equals("GET"))
+        ) {
             System.out.println("Bypassing security for public route: " + method + " " + path);
             return chain.filter(exchange);
         }
 
         // 2. Check for Authorization Header
+        try {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || authHeader.isEmpty() || authHeader.length() < 7 || !authHeader.startsWith("Bearer ")) {
             throw new RuntimeException("Invalid JWT Token");
         }
 
         String token = authHeader.substring(7);
-        try {
-            // 3. Extract the "user" claim (JSON string) using your JWTService
-            String userJson = jwtService.extractClaim(token, claims -> claims.get("user", String.class));
-            String email = jwtService.extractEmail(token);
+        // 3. Extract the "user" claim (JSON string) using your JWTService
+        String userJson = jwtService.extractClaim(token, claims -> claims.get("user", String.class));
+        String email = jwtService.extractEmail(token);
 
-            if (userJson == null || email == null) {
-                throw new RuntimeException("Invalid token payload");
-            }
+        if (userJson == null || email == null) {
+            throw new RuntimeException("Invalid token payload");
+        }
 
-            System.out.println("request from: " + email);
+        System.out.println("request from: " + email);
 
-            // 4. Mutate the request to add the 'x-user' header
-            // This header will now be available to all downstream services (User-Service, Trip-Service, etc.)
-            ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-                    .header("x-user", userJson)
-                    .header("x-user-email", email)
-                    .build();
+        // 4. Mutate the request to add the 'x-user' header
+        // This header will now be available to all downstream services (User-Service, Trip-Service, etc.)
+        ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+                .header("x-user", userJson)
+                .header("x-user-email", email)
+                .build();
 
-            return chain.filter(exchange.mutate().request(modifiedRequest).build());
+        return chain.filter(exchange.mutate().request(modifiedRequest).build());
 
         } catch (Exception e) {
             return onError(exchange, "Invalid or Expired Token", HttpStatus.UNAUTHORIZED);

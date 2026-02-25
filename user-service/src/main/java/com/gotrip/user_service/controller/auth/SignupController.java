@@ -74,7 +74,12 @@ public class SignupController {
             refreshCookie.setMaxAge((int) (AppConfig.REFRESH_TOKEN_EXPIRATION));
             response.addCookie(refreshCookie);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(signupData.get("user"));
+            Map<String, Object> responseBody = Map.of(
+                    "user", signupData.get("user"),
+                    "accessToken", signupData.get("accessToken").toString(),
+                    "refreshToken", signupData.get("refreshToken").toString()
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
 
         } catch (RuntimeException e) {
             ApiErrorResponse error = new ApiErrorResponse(
@@ -96,7 +101,13 @@ public class SignupController {
             accessCookie.setMaxAge(AppConfig.ACCESS_TOKEN_EXPIRATION); // 5 mins
             accessCookie.setHttpOnly(false);
             response.addCookie(accessCookie);
-            return ResponseEntity.status(HttpStatus.CREATED).body(updatedData.get("user"));
+
+            Map<String, Object> responseBody = Map.of(
+                    "user", updatedData.get("user"),
+                    "accessToken", updatedData.get("accessToken").toString()
+            );
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
 
         } catch (Exception e) {
             ApiErrorResponse error = new ApiErrorResponse(
@@ -126,7 +137,12 @@ public class SignupController {
             refreshCookie.setMaxAge((int) (AppConfig.REFRESH_TOKEN_EXPIRATION));
             response.addCookie(refreshCookie);
 
-            return ResponseEntity.status(HttpStatus.OK).body(loginData.get("user"));
+            Map<String, Object> responseBody = Map.of(
+                    "user", loginData.get("user"),
+                    "accessToken", loginData.get("accessToken").toString(),
+                    "refreshToken", loginData.get("refreshToken").toString()
+            );
+            return ResponseEntity.status(HttpStatus.OK).body(responseBody);
 
         } catch (Exception e) {
             ApiErrorResponse error = new ApiErrorResponse(

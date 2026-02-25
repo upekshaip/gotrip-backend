@@ -47,9 +47,12 @@ public class GatewayJwtFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
+        String method = exchange.getRequest().getMethod().name();
 
         // 1. Skip validation for Auth endpoints (Signup/Login)
-        if (path.contains("/auth/")) {
+        if ((path.equals("/auth/login") && method.equals("POST")) ||
+                (path.equals("/auth/signup") && method.equals("POST"))) {
+            System.out.println("Bypassing security for public route: " + method + " " + path);
             return chain.filter(exchange);
         }
 

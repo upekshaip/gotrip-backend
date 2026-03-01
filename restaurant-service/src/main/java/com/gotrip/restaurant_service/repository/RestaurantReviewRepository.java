@@ -18,12 +18,13 @@ public interface RestaurantReviewRepository extends JpaRepository<RestaurantRevi
     // Check if a traveler has already reviewed a specific booking
     boolean existsByBookingId(Long bookingId);
 
-    // Calculate the average rating for a restaurant
+    // Calculate the average rating for a restaurant to update the Restaurant listing
     @Query("SELECT AVG(r.rating) FROM RestaurantReview r WHERE r.restaurant.restaurantId = :restaurantId")
     Double getAverageRatingForRestaurant(@Param("restaurantId") Long restaurantId);
 
     /**
-     * Delete all reviews for a restaurant (used in soft-delete logic).
+     * FIX: Added for the Restaurant Service's delete logic.
+     * Use @Modifying because this is a DML (Delete) operation.
      */
     @Modifying
     @Transactional

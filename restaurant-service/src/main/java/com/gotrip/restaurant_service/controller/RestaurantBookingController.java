@@ -1,10 +1,10 @@
 package com.gotrip.restaurant_service.controller;
 
 
-import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
 import com.gotrip.common_library.dto.restaurant_service.RestaurantBookingRequest;
 import com.gotrip.common_library.dto.restaurant_service.RestaurantBookingResponse;
 import com.gotrip.common_library.dto.restaurant_service.RestaurantRespondDTO;
+import com.gotrip.common_library.dto.restaurant_service.enums.BookingStatus;
 import com.gotrip.restaurant_service.model.RestaurantBooking;
 import com.gotrip.restaurant_service.service.RestaurantBookingService;
 import lombok.RequiredArgsConstructor;
@@ -27,15 +27,18 @@ public class RestaurantBookingController {
 
     @PatchMapping("/{id}/respond")
     public ResponseEntity<?> respond(@PathVariable Long id,
-                                     @RequestBody RestaurantRespondDTO respondDTO,
+                                     @RequestBody RestaurantRespondDTO restaurantRespondDTO,
+//                                     @RequestParam BookingStatus status,
+//                                     @RequestParam String message,
                                      Authentication auth) {
-        return ResponseEntity.ok(bookingService.respondToBooking(id, respondDTO, auth));
+        return ResponseEntity.ok(bookingService.respondToBooking(id, restaurantRespondDTO, auth));
     }
 
     @DeleteMapping("/{id}/cancel")
     public ResponseEntity<?> cancel(@PathVariable Long id, Authentication auth) {
         return ResponseEntity.ok(bookingService.cancelBooking(id, auth));
     }
+
 
     @GetMapping("/my-bookings")
     public ResponseEntity<Page<RestaurantBookingResponse>> getMyTrips(
@@ -46,6 +49,7 @@ public class RestaurantBookingController {
         return ResponseEntity.ok(bookingService.getTravellerBookings(status, page, limit, auth));
     }
 
+    // Fixed: Changed from Page<RestaurantBooking> to Page<RestaurantBookingResponse>
     @GetMapping("/incoming-requests")
     public ResponseEntity<Page<RestaurantBookingResponse>> getIncomingRequests(
             @RequestParam(required = false) BookingStatus status,

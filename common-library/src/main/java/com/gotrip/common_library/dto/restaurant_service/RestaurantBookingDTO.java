@@ -1,6 +1,6 @@
 package com.gotrip.common_library.dto.restaurant_service;
 
-import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
+import com.gotrip.common_library.dto.restaurant_service.enums.BookingStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,8 +11,11 @@ public record RestaurantBookingDTO(
         String bookingReference,
         BookingStatus status,
         int personCount,
-        LocalDate reservationDate,
-        LocalTime reservationTime,
+        int roomCount,
+        LocalDate startingDate,
+        LocalTime startingTime,
+        LocalDate endingDate,
+        LocalTime endingTime,
         BigDecimal finalAmount,
         String requestMessage,
         String providerMessage,
@@ -20,4 +23,5 @@ public record RestaurantBookingDTO(
         BigDecimal totalAmount,
         BigDecimal discountAmount,
         BigDecimal basePrice
+
 ) {}

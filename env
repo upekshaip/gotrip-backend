@@ -1,0 +1,13 @@
+# add your neon db url here
+USER_SERVICE_DB_URL=jdbc:postgresql://ep-autumn-sun-aiugn031-pooler.c-4.us-east-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_mgN8yLPWo5UV&sslmode=require&channelBinding=require
+REVIEW_SERVICE_DB_URL=jdbc:postgresql://ep-mute-base-adcqxg7w-pooler.c-2.us-east-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_PqQ72xcKSukj&sslmode=require&channelBinding=require
+
+
+# don't change this
+
+
+
+
+JWT_SECRET=d72bd332afea8b3b5c95d0335b1b071bc25683b7aa6111762c750a8ae1afec9b
+
+

@@ -27,6 +27,7 @@
         <module>experience-service</module>
         <module>my-gateway</module>
         <module>transport-service</module>
+        <module>review-service</module>
         <module>restaurant-service</module>
 
     </modules>
@@ -45,6 +46,22 @@
                 <artifactId>spring-dotenv</artifactId>
                 <version>4.0.0</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.gotrip</groupId>
+                <artifactId>common-library</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+
+
+
+
+
+
+
+
+
         </dependencies>
     </dependencyManagement>
 

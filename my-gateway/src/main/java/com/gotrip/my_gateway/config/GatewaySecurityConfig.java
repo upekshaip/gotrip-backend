@@ -17,6 +17,7 @@ public class GatewaySecurityConfig {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/auth/**").permitAll() // Public routes
                         .pathMatchers("/user/**").permitAll()
+                        .pathMatchers("/hotel-service/**").permitAll()
                         .pathMatchers("/experience/**").permitAll()
                         .anyExchange().authenticated()        // Gateway-level protection
                 )

@@ -43,10 +43,12 @@ public class GatewayConfig {
                 .route("auth_route", r -> r.path("/auth/**")
                         .uri("lb://user-service"))
 
-
                 .route("user_route", r -> r.path("/user/**")
                         .uri("lb://user-service"))
 
+                .route("hotel_service_route", r -> r.path("/hotel-service/**")
+                        .uri("lb://hotel-service"))
+          
                 .route("experience_route", r -> r.path("/experience/**")
                         .uri("lb://experience-service"))
                 .build();

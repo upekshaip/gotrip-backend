@@ -1,5 +1,7 @@
 package com.gotrip.hotel_service.model;
 
+import com.gotrip.common_library.dto.hotel_service.enums.HotelStatus;
+import com.gotrip.common_library.dto.hotel_service.enums.PriceUnit;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,8 +30,9 @@ public class Hotel {
     @Column(nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status; //
+    private HotelStatus status = HotelStatus.PENDING; // Use the Enum here
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -40,8 +43,12 @@ public class Hotel {
     @Column(nullable = false)
     private String city;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PriceUnit priceUnit = PriceUnit.PER_DAY; // Default for hotels
+
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal pricePerNight;
+    private BigDecimal price;
 
     // Geographic Coordinates
     @Column(nullable = false)
@@ -49,10 +56,6 @@ public class Hotel {
 
     @Column(nullable = false)
     private Double longitude;
-
-
-    @Column(nullable = false)
-    private boolean isActive = true; // Is the hotel currently listed?
 
     @Column(nullable = false)
     private boolean isFeatured = false; // Is the hotel currently featured?

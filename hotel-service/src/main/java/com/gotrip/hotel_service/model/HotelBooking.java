@@ -1,7 +1,6 @@
 package com.gotrip.hotel_service.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
 import jakarta.persistence.*;
         import lombok.Getter;
 import lombok.Setter;

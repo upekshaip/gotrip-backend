@@ -1,12 +1,11 @@
 package com.gotrip.hotel_service.controller;
 
 
-import com.gotrip.common_library.config.AppConfig;
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
-import com.gotrip.common_library.dto.user.UserProfileUpdateRequest;
+import com.gotrip.common_library.dto.hotel_service.HotelCreateRequest;
 import com.gotrip.hotel_service.service.HotelService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,31 +19,43 @@ import java.util.Map;
 public class HotelServiceController {
 
     private final ObjectMapper objectMapper;
-//    private final HotelService hotelService;
+    private final HotelService hotelService;
 
-    public HotelServiceController(ObjectMapper objectMapper) {
+    public HotelServiceController(ObjectMapper objectMapper, HotelService hotelService) {
         this.objectMapper = objectMapper;
-//        this.hotelService = hotelService;
+        this.hotelService = hotelService;
+    }
+
+    @PostMapping
+    public ResponseEntity<?> create(@Valid @RequestBody HotelCreateRequest req, Authentication auth) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(hotelService.createHotel(req, auth));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> list() {
+        return ResponseEntity.ok(hotelService.getAllActive());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> get(@PathVariable Long id) {
+        return ResponseEntity.ok(hotelService.getById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody HotelCreateRequest req, Authentication auth) {
+        return ResponseEntity.ok(hotelService.update(id, req, auth));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id, Authentication auth) {
+        hotelService.delete(id, auth);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> getMyDetails(Authentication authentication) {
         System.out.println("request coming...");
-        try {
-        if (authentication == null) {
-           throw new Exception("Authorization is null");
-        }
-        // This is the user Map we extracted from the JSON string in the JWT
         return ResponseEntity.ok(authentication.getPrincipal());
-        }  catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ApiErrorResponse(
-                            e.getMessage(),
-                            HttpStatus.BAD_REQUEST.value(),
-                            System.currentTimeMillis()
-                    )
 
-            );
-        }
     }
 }

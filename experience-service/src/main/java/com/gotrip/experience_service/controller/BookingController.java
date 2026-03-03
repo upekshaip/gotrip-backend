@@ -3,6 +3,7 @@ package com.gotrip.experience_service.controller;
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.experience_service.dto.*;
 import com.gotrip.experience_service.service.BookingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class BookingController {
     @PostMapping("/request")
     public ResponseEntity<?> createBooking(
             Authentication authentication,
-            @RequestBody BookingRequestDTO request) {
+            @Valid @RequestBody BookingRequestDTO request) {
         try {
             Long travellerId = extractUserId(authentication);
             BookingResponseDTO response = bookingService.createBooking(request, travellerId);

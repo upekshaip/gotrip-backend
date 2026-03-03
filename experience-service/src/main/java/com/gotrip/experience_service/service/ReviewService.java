@@ -1,10 +1,10 @@
 package com.gotrip.experience_service.service;
 
+import com.gotrip.common_library.exception.BadRequestException;
+import com.gotrip.common_library.exception.ResourceNotFoundException;
 import com.gotrip.experience_service.dto.CreateReviewRequest;
 import com.gotrip.experience_service.dto.ReviewResponseDTO;
 import com.gotrip.experience_service.dto.ReviewSummaryDTO;
-import com.gotrip.experience_service.exception.BadRequestException;
-import com.gotrip.experience_service.exception.ResourceNotFoundException;
 import com.gotrip.experience_service.model.Experience;
 import com.gotrip.experience_service.model.ExperienceReview;
 import com.gotrip.experience_service.repository.ExperienceRepository;

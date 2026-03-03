@@ -5,6 +5,7 @@ import com.gotrip.experience_service.dto.CreateReviewRequest;
 import com.gotrip.experience_service.dto.ReviewResponseDTO;
 import com.gotrip.experience_service.dto.ReviewSummaryDTO;
 import com.gotrip.experience_service.service.ReviewService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<?> createReview(
             Authentication authentication,
-            @RequestBody CreateReviewRequest request) {
+            @Valid @RequestBody CreateReviewRequest request) {
         try {
             Long travellerId = extractUserId(authentication);
             ReviewResponseDTO response = reviewService.createReview(request, travellerId);
@@ -40,7 +41,7 @@ public class ReviewController {
     public ResponseEntity<?> updateReview(
             Authentication authentication,
             @PathVariable Long reviewId,
-            @RequestBody CreateReviewRequest request) {
+            @Valid @RequestBody CreateReviewRequest request) {
         try {
             Long travellerId = extractUserId(authentication);
             ReviewResponseDTO response = reviewService.updateReview(reviewId, request, travellerId);

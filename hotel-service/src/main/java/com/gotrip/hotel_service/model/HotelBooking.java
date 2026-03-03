@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -35,7 +36,6 @@ public class HotelBooking {
     @Column(nullable = false)
     private BookingStatus status = BookingStatus.PENDING;
 
-
     @Column(nullable = false)
     private Long hotelId;
 
@@ -60,9 +60,17 @@ public class HotelBooking {
     @Column(nullable = false)
     private LocalTime endingTime;
 
+    @Column(precision = 10, scale = 2)
+    private BigDecimal totalAmount;
 
+    @Column(precision = 10, scale = 2)
+    private BigDecimal discountAmount;
 
+    @Column(precision = 10, scale = 2)
+    private BigDecimal finalAmount;
 
+    @Column
+    private Long reviewId;
 
     // --- Auditing Fields ---
     @CreatedDate

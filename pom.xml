@@ -23,6 +23,7 @@
         <module>common-library</module>
         <module>discovery-server</module>
         <module>user-service</module>
+        <module>hotel-service</module>
         <module>my-gateway</module>
     </modules>
 

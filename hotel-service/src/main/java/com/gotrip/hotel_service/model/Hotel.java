@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Setter
@@ -26,6 +27,9 @@ public class Hotel {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private String status; //
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -64,4 +68,8 @@ public class Hotel {
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    // Relationship to reviews (Optional, but helpful for fetching)
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<HotelReview> reviews;
 }

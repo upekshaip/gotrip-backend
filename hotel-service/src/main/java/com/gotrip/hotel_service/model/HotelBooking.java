@@ -70,7 +70,7 @@ public class HotelBooking {
     private BigDecimal finalAmount;
 
     @Column
-    private Double rating;
+    private Long reviewId;
 
     // --- Auditing Fields ---
     @CreatedDate

@@ -6,9 +6,9 @@ import com.gotrip.experience_service.dto.ReviewSummaryDTO;
 import com.gotrip.experience_service.exception.BadRequestException;
 import com.gotrip.experience_service.exception.ResourceNotFoundException;
 import com.gotrip.experience_service.model.Experience;
-import com.gotrip.experience_service.model.Review;
+import com.gotrip.experience_service.model.ExperienceReview;
 import com.gotrip.experience_service.repository.ExperienceRepository;
-import com.gotrip.experience_service.repository.ReviewRepository;
+import com.gotrip.experience_service.repository.ExperienceReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewService {
 
-    private final ReviewRepository reviewRepository;
+    private final ExperienceReviewRepository experienceReviewRepository;
     private final ExperienceRepository experienceRepository;
 
     public ReviewResponseDTO createReview(CreateReviewRequest request, Long travellerId) {
@@ -26,7 +26,7 @@ public class ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException("Experience not found"));
 
         // Check if the traveller has already reviewed this experience
-        reviewRepository.findByExperienceExperienceIdAndTravellerId(request.getExperienceId(), travellerId)
+        experienceReviewRepository.findByExperienceExperienceIdAndTravellerId(request.getExperienceId(), travellerId)
                 .ifPresent(existing -> {
                     throw new BadRequestException("You have already reviewed this experience");
                 });
@@ -36,22 +36,22 @@ public class ReviewService {
             throw new BadRequestException("Rating must be between 1 and 5");
         }
 
-        Review review = Review.builder()
+        ExperienceReview experienceReview = ExperienceReview.builder()
                 .experience(experience)
                 .travellerId(travellerId)
                 .rating(request.getRating())
                 .comment(request.getComment())
                 .build();
 
-        Review saved = reviewRepository.save(review);
+        ExperienceReview saved = experienceReviewRepository.save(experienceReview);
         return mapToDTO(saved);
     }
 
     public ReviewResponseDTO updateReview(Long reviewId, CreateReviewRequest request, Long travellerId) {
-        Review review = reviewRepository.findById(reviewId)
+        ExperienceReview experienceReview = experienceReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
 
-        if (!review.getTravellerId().equals(travellerId)) {
+        if (!experienceReview.getTravellerId().equals(travellerId)) {
             throw new BadRequestException("You can only update your own reviews");
         }
 
@@ -59,41 +59,41 @@ public class ReviewService {
             throw new BadRequestException("Rating must be between 1 and 5");
         }
 
-        review.setRating(request.getRating());
-        review.setComment(request.getComment());
+        experienceReview.setRating(request.getRating());
+        experienceReview.setComment(request.getComment());
 
-        Review updated = reviewRepository.save(review);
+        ExperienceReview updated = experienceReviewRepository.save(experienceReview);
         return mapToDTO(updated);
     }
 
     public void deleteReview(Long reviewId, Long travellerId) {
-        Review review = reviewRepository.findById(reviewId)
+        ExperienceReview experienceReview = experienceReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
 
-        if (!review.getTravellerId().equals(travellerId)) {
+        if (!experienceReview.getTravellerId().equals(travellerId)) {
             throw new BadRequestException("You can only delete your own reviews");
         }
 
-        reviewRepository.delete(review);
+        experienceReviewRepository.delete(experienceReview);
     }
 
     public List<ReviewResponseDTO> getReviewsByExperience(Long experienceId) {
-        return reviewRepository.findByExperienceExperienceId(experienceId)
+        return experienceReviewRepository.findByExperienceExperienceId(experienceId)
                 .stream()
                 .map(this::mapToDTO)
                 .toList();
     }
 
     public List<ReviewResponseDTO> getMyReviews(Long travellerId) {
-        return reviewRepository.findByTravellerId(travellerId)
+        return experienceReviewRepository.findByTravellerId(travellerId)
                 .stream()
                 .map(this::mapToDTO)
                 .toList();
     }
 
     public ReviewSummaryDTO getReviewSummary(Long experienceId) {
-        Double avgRating = reviewRepository.findAverageRatingByExperienceId(experienceId);
-        Long totalReviews = reviewRepository.countByExperienceId(experienceId);
+        Double avgRating = experienceReviewRepository.findAverageRatingByExperienceId(experienceId);
+        Long totalReviews = experienceReviewRepository.countByExperienceId(experienceId);
 
         return ReviewSummaryDTO.builder()
                 .experienceId(experienceId)
@@ -102,16 +102,16 @@ public class ReviewService {
                 .build();
     }
 
-    private ReviewResponseDTO mapToDTO(Review review) {
+    private ReviewResponseDTO mapToDTO(ExperienceReview experienceReview) {
         return ReviewResponseDTO.builder()
-                .reviewId(review.getReviewId())
-                .experienceId(review.getExperience().getExperienceId())
-                .experienceTitle(review.getExperience().getTitle())
-                .travellerId(review.getTravellerId())
-                .rating(review.getRating())
-                .comment(review.getComment())
-                .createdAt(review.getCreatedAt())
-                .updatedAt(review.getUpdatedAt())
+                .reviewId(experienceReview.getReviewId())
+                .experienceId(experienceReview.getExperience().getExperienceId())
+                .experienceTitle(experienceReview.getExperience().getTitle())
+                .travellerId(experienceReview.getTravellerId())
+                .rating(experienceReview.getRating())
+                .comment(experienceReview.getComment())
+                .createdAt(experienceReview.getCreatedAt())
+                .updatedAt(experienceReview.getUpdatedAt())
                 .build();
     }
 }

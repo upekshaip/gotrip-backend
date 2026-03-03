@@ -24,6 +24,7 @@
         <module>discovery-server</module>
         <module>user-service</module>
         <module>hotel-service</module>
+        <module>experience-service</module>
         <module>my-gateway</module>
     </modules>
 

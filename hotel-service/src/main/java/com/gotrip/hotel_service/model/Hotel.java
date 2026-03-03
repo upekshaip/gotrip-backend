@@ -1,15 +1,13 @@
 package com.gotrip.hotel_service.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-        import lombok.Getter;
+import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,33 +19,42 @@ public class Hotel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long bookingId;
-
-    //    if approved changed to approve, or rejected, else timeout
-    @Column(nullable = false)
-    private String status;
+    private Long hotelId;
 
     @Column(nullable = false)
-    private Long travellerId;
+    private Long providerId; // The service provider who owns this hotel
 
     @Column(nullable = false)
-    private Long bookingServiceId;
+    private String name;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @Column(nullable = false)
-    private int personCount;
+    private String address;
 
     @Column(nullable = false)
-    private String reason;
+    private String city;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal pricePerNight;
+
+    // Geographic Coordinates
+    @Column(nullable = false)
+    private Double latitude;
+
+    @Column(nullable = false)
+    private Double longitude;
+
+
+    @Column(nullable = false)
+    private boolean isActive = true; // Is the hotel currently listed?
+
+    @Column(nullable = false)
+    private boolean isFeatured = false; // Is the hotel currently featured?
 
     @Column
-    private boolean isApproved;
-
-    @Column(nullable = false)
-    private String requestMessage;
-
-
-
-
+    private String imageUrl; // URL to the main thumbnail
 
     // --- Auditing Fields ---
     @CreatedDate
@@ -57,5 +64,4 @@ public class Hotel {
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-
 }

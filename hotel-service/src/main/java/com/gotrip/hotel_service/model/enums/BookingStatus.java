@@ -1,9 +1,9 @@
-package com.gotrip.hotel_service.model;
+package com.gotrip.hotel_service.model.enums;
 
 public enum BookingStatus {
     PENDING,
-    APPROVED,
-    REJECTED,
+    ACCEPTED,
+    DECLINED,
     CANCELLED,
     EXPIRED,
     COMPLETED

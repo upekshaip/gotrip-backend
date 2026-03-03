@@ -1,5 +1,6 @@
 package com.gotrip.hotel_service.model;
 
+import com.gotrip.hotel_service.model.enums.PriceUnit;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,8 +41,12 @@ public class Hotel {
     @Column(nullable = false)
     private String city;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PriceUnit priceUnit = PriceUnit.PER_DAY; // Default for hotels
+
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal pricePerNight;
+    private BigDecimal price;
 
     // Geographic Coordinates
     @Column(nullable = false)

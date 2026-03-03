@@ -46,6 +46,9 @@ public class GatewayConfig {
 
                 .route("user_route", r -> r.path("/user/**")
                         .uri("lb://user-service"))
+
+                .route("experience_route", r -> r.path("/experience/**")
+                        .uri("lb://experience-service"))
                 .build();
     }
 

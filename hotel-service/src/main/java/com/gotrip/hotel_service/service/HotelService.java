@@ -88,6 +88,6 @@ public class HotelService {
         hotel.setLatitude(req.latitude());
         hotel.setLongitude(req.longitude());
         hotel.setImageUrl(req.imageUrl());
-        hotel.setFeatured(req.isFeatured());
+        hotel.setFeatured(req.featured());
     }
 }

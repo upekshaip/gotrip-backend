@@ -33,6 +33,6 @@ public record HotelCreateRequest(
 
         String imageUrl,
 
-        boolean isFeatured
+        boolean featured
 ) {
 }

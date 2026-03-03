@@ -1,6 +1,6 @@
 package com.gotrip.hotel_service.repository;
 
-import com.gotrip.hotel_service.model.enums.BookingStatus;
+import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
 import com.gotrip.hotel_service.model.HotelBooking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

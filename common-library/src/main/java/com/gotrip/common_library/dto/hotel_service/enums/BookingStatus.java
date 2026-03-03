@@ -1,4 +1,4 @@
-package com.gotrip.hotel_service.model.enums;
+package com.gotrip.common_library.dto.hotel_service.enums;
 
 public enum BookingStatus {
     PENDING,

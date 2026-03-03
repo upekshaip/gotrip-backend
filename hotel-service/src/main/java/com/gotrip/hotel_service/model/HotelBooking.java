@@ -1,6 +1,6 @@
 package com.gotrip.hotel_service.model;
 
-import com.gotrip.hotel_service.model.enums.BookingStatus;
+import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
 import jakarta.persistence.*;
         import lombok.Getter;
 import lombok.Setter;

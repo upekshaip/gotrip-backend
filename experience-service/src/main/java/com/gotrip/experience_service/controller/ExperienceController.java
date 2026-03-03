@@ -3,6 +3,7 @@ package com.gotrip.experience_service.controller;
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.experience_service.dto.*;
 import com.gotrip.experience_service.service.ExperienceService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class ExperienceController {
     @PostMapping("/create")
     public ResponseEntity<?> createExperience(
             Authentication authentication,
-            @RequestBody CreateExperienceRequest request) {
+            @Valid @RequestBody CreateExperienceRequest request) {
         try {
             Long providerId = extractUserId(authentication);
             ExperienceResponseDTO response = experienceService.createExperience(request, providerId);

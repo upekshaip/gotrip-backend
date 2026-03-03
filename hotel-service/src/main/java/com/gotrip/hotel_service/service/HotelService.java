@@ -6,6 +6,11 @@ import com.gotrip.hotel_service.model.Hotel;
 import com.gotrip.hotel_service.repository.HotelRepository;
 import com.gotrip.hotel_service.repository.HotelReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +41,23 @@ public class HotelService {
                 .toList();
     }
 
+    public Page<Hotel> getMyAll(HotelStatus status, int page, int limit, Authentication auth) {
+        Long providerId = extractProviderId(auth);
+
+        // PageRequest.of returns the correct org.springframework.data.domain.Pageable
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("updatedAt").descending());
+
+        if (status != null) {
+            return hotelRepository.findByProviderIdAndStatusAndStatusNot(
+                    providerId, status, HotelStatus.REMOVED, pageable);
+        }
+
+        return hotelRepository.findByProviderIdAndStatusNot(
+                providerId, HotelStatus.REMOVED, pageable);
+    }
+
+
+
     public Hotel getById(Long id) {
         return hotelRepository.findById(id)
                 .filter(h -> h.getStatus() != HotelStatus.REMOVED)
@@ -51,7 +73,7 @@ public class HotelService {
     }
 
     @Transactional
-    public void delete(Long id, Authentication auth) {
+    public Hotel delete(Long id, Authentication auth) {
         Hotel hotel = getById(id);
         validateOwnership(hotel, auth);
 
@@ -61,6 +83,7 @@ public class HotelService {
 
         // Hard Delete all associated reviews
         reviewRepository.deleteAllByHotel_HotelId(id);
+        return  hotel;
     }
 
     private void validateOwnership(Hotel hotel, Authentication auth) {
@@ -88,6 +111,6 @@ public class HotelService {
         hotel.setLatitude(req.latitude());
         hotel.setLongitude(req.longitude());
         hotel.setImageUrl(req.imageUrl());
-        hotel.setFeatured(req.isFeatured());
+        hotel.setFeatured(req.featured());
     }
 }

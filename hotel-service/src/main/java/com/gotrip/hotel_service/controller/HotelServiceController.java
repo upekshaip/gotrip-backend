@@ -3,6 +3,7 @@ package com.gotrip.hotel_service.controller;
 
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.common_library.dto.hotel_service.HotelCreateRequest;
+import com.gotrip.common_library.dto.hotel_service.enums.HotelStatus;
 import com.gotrip.hotel_service.service.HotelService;
 
 import jakarta.validation.Valid;
@@ -36,6 +37,15 @@ public class HotelServiceController {
         return ResponseEntity.ok(hotelService.getAllActive());
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyHotels(
+            @RequestParam(required = false) HotelStatus status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            Authentication auth) {
+        return ResponseEntity.ok(hotelService.getMyAll(status, page, limit, auth));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
         return ResponseEntity.ok(hotelService.getById(id));
@@ -48,8 +58,7 @@ public class HotelServiceController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, Authentication auth) {
-        hotelService.delete(id, auth);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(hotelService.delete(id, auth));
     }
 
     @GetMapping("/me")

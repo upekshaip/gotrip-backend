@@ -10,6 +10,7 @@ import org.springframework.context.annotation.FilterType;
 @SpringBootApplication(scanBasePackages = {
 		"com.gotrip.my_gateway",
 		"com.gotrip.common_library"
+
 },
 exclude = {DataSourceAutoConfiguration.class}
 )

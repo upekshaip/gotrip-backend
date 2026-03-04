@@ -3,6 +3,7 @@ package com.gotrip.hotel_service.controller;
 
 import com.gotrip.common_library.dto.hotel_service.HotelBookingRequest;
 import com.gotrip.common_library.dto.hotel_service.HotelBookingResponse;
+import com.gotrip.common_library.dto.hotel_service.HotelRespondDTO;
 import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
 import com.gotrip.hotel_service.model.HotelBooking;
 import com.gotrip.hotel_service.service.HotelBookingService;
@@ -26,13 +27,14 @@ public class HotelBookingController {
 
     @PatchMapping("/{id}/respond")
     public ResponseEntity<?> respond(@PathVariable Long id,
-                                     @RequestParam BookingStatus status,
-                                     @RequestParam String message,
+                                     @RequestBody HotelRespondDTO hotelRespondDTO,
+//                                     @RequestParam BookingStatus status,
+//                                     @RequestParam String message,
                                      Authentication auth) {
-        return ResponseEntity.ok(bookingService.respondToBooking(id, status, message, auth));
+        return ResponseEntity.ok(bookingService.respondToBooking(id, hotelRespondDTO, auth));
     }
 
-    @PatchMapping("/{id}/cancel")
+    @DeleteMapping("/{id}/cancel")
     public ResponseEntity<?> cancel(@PathVariable Long id, Authentication auth) {
         return ResponseEntity.ok(bookingService.cancelBooking(id, auth));
     }

@@ -27,7 +27,7 @@ public class ReviewController {
             Authentication authentication,
             @Valid @RequestBody CreateReviewRequest request) {
         try {
-            Long travellerId = extractUserId(authentication);
+            Long travellerId = extractTravellerId(authentication);
             ReviewResponseDTO response = reviewService.createReview(request, travellerId);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
@@ -43,7 +43,7 @@ public class ReviewController {
             @PathVariable Long reviewId,
             @Valid @RequestBody CreateReviewRequest request) {
         try {
-            Long travellerId = extractUserId(authentication);
+            Long travellerId = extractTravellerId(authentication);
             ReviewResponseDTO response = reviewService.updateReview(reviewId, request, travellerId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -58,7 +58,7 @@ public class ReviewController {
             Authentication authentication,
             @PathVariable Long reviewId) {
         try {
-            Long travellerId = extractUserId(authentication);
+            Long travellerId = extractTravellerId(authentication);
             reviewService.deleteReview(reviewId, travellerId);
             return ResponseEntity.ok(Map.of("message", "Review deleted successfully"));
         } catch (Exception e) {
@@ -83,7 +83,7 @@ public class ReviewController {
     @GetMapping("/my-reviews")
     public ResponseEntity<?> getMyReviews(Authentication authentication) {
         try {
-            Long travellerId = extractUserId(authentication);
+            Long travellerId = extractTravellerId(authentication);
             List<ReviewResponseDTO> reviews = reviewService.getMyReviews(travellerId);
             return ResponseEntity.ok(reviews);
         } catch (Exception e) {
@@ -106,11 +106,21 @@ public class ReviewController {
     }
 
     @SuppressWarnings("unchecked")
-    private Long extractUserId(Authentication authentication) {
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new RuntimeException("User not authenticated");
+    private Long extractProviderId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("serviceProvider", false)) {
+            throw new RuntimeException("Unauthorized: You are not authorized to perform this operation.");
         }
-        Map<String, Object> principal = (Map<String, Object>) authentication.getPrincipal();
-        return Long.valueOf(principal.get("userId").toString());
+        Map<String, Object> profile = (Map<String, Object>) principal.get("serviceProviderProfile");
+        return ((Number) profile.get("providerId")).longValue();
+    }
+
+    private Long extractTravellerId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("traveller", false)) {
+            throw new RuntimeException("Unauthorized: You are not authorized to perform this operation..");
+        }
+        Map<String, Object> profile = (Map<String, Object>) principal.get("travellerProfile");
+        return ((Number) profile.get("travellerId")).longValue();
     }
 }

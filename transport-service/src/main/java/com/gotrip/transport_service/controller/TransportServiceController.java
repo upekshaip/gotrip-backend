@@ -1,12 +1,7 @@
 package com.gotrip.transport_service.controller;
 
-
-import com.gotrip.common_library.config.AppConfig;
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
-import com.gotrip.common_library.dto.user.UserProfileUpdateRequest;
-import com.sun.jdi.connect.spi.TransportService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,11 +15,11 @@ import java.util.Map;
 public class TransportServiceController {
 
     private final ObjectMapper objectMapper;
-    private final TransportService transportService;
+//    private final TransportService transportService;
 
-    public TransportServiceController( TransportService transportService , ObjectMapper objectMapper ) {
+    public TransportServiceController(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.transportService = transportService;
+//        this.transportService = transportService;
     }
 
     @GetMapping("/me")
@@ -45,8 +40,6 @@ public class TransportServiceController {
 
             );
         }
-    }
-
     }
 }
 

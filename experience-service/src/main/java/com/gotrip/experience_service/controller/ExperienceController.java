@@ -24,7 +24,7 @@ public class ExperienceController {
             Authentication authentication,
             @Valid @RequestBody CreateExperienceRequest request) {
         try {
-            Long providerId = extractUserId(authentication);
+            Long providerId = extractProviderId(authentication);
             ExperienceResponseDTO response = experienceService.createExperience(request, providerId);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
@@ -40,7 +40,7 @@ public class ExperienceController {
             @PathVariable Long id,
             @RequestBody UpdateExperienceRequest request) {
         try {
-            Long providerId = extractUserId(authentication);
+            Long providerId = extractProviderId(authentication);
             ExperienceResponseDTO response = experienceService.updateExperience(id, request, providerId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -55,7 +55,7 @@ public class ExperienceController {
             Authentication authentication,
             @PathVariable Long id) {
         try {
-            Long providerId = extractUserId(authentication);
+            Long providerId = extractProviderId(authentication);
             experienceService.deleteExperience(id, providerId);
             return ResponseEntity.ok(Map.of("message", "Experience deleted successfully"));
         } catch (Exception e) {
@@ -100,7 +100,7 @@ public class ExperienceController {
     @GetMapping("/my-listings")
     public ResponseEntity<?> getMyListings(Authentication authentication) {
         try {
-            Long providerId = extractUserId(authentication);
+            Long providerId = extractProviderId(authentication);
             return ResponseEntity.ok(experienceService.getExperiencesByProvider(providerId));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -110,11 +110,21 @@ public class ExperienceController {
     }
 
     @SuppressWarnings("unchecked")
-    private Long extractUserId(Authentication authentication) {
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new RuntimeException("User not authenticated");
+    private Long extractProviderId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("serviceProvider", false)) {
+            throw new RuntimeException("Unauthorized: You are not authorized to perform this operation.");
         }
-        Map<String, Object> principal = (Map<String, Object>) authentication.getPrincipal();
-        return Long.valueOf(principal.get("userId").toString());
+        Map<String, Object> profile = (Map<String, Object>) principal.get("serviceProviderProfile");
+        return ((Number) profile.get("providerId")).longValue();
+    }
+
+    private Long extractTravellerId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("traveller", false)) {
+            throw new RuntimeException("Unauthorized: You are not authorized to perform this operation..");
+        }
+        Map<String, Object> profile = (Map<String, Object>) principal.get("travellerProfile");
+        return ((Number) profile.get("travellerId")).longValue();
     }
 }

@@ -5,6 +5,8 @@ import com.gotrip.experience_service.dto.*;
 import com.gotrip.experience_service.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,7 +26,7 @@ public class BookingController {
             Authentication authentication,
             @Valid @RequestBody BookingRequestDTO request) {
         try {
-            Long travellerId = extractUserId(authentication);
+            Long travellerId = extractTravellerId(authentication);
             BookingResponseDTO response = bookingService.createBooking(request, travellerId);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
@@ -40,7 +42,7 @@ public class BookingController {
             @PathVariable Long bookingId,
             @RequestBody ProviderActionDTO actionDTO) {
         try {
-            Long providerId = extractUserId(authentication);
+            Long providerId = extractProviderId(authentication);
             BookingResponseDTO response = bookingService.providerAction(bookingId, actionDTO, providerId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -55,7 +57,7 @@ public class BookingController {
             Authentication authentication,
             @PathVariable Long bookingId) {
         try {
-            Long travellerId = extractUserId(authentication);
+            Long travellerId = extractTravellerId(authentication);
             BookingResponseDTO response = bookingService.cancelBooking(bookingId, travellerId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -80,7 +82,7 @@ public class BookingController {
     @GetMapping("/my-bookings")
     public ResponseEntity<?> getMyBookings(Authentication authentication) {
         try {
-            Long travellerId = extractUserId(authentication);
+            Long travellerId = extractTravellerId(authentication);
             return ResponseEntity.ok(bookingService.getBookingsByTraveller(travellerId));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -90,21 +92,20 @@ public class BookingController {
     }
 
     @GetMapping("/provider/all")
-    public ResponseEntity<?> getProviderBookings(Authentication authentication) {
-        try {
-            Long providerId = extractUserId(authentication);
-            return ResponseEntity.ok(bookingService.getBookingsByProvider(providerId));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ApiErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value(), System.currentTimeMillis())
-            );
-        }
+    public ResponseEntity<?> getProviderBookings(
+            Authentication authentication,
+            Pageable pageable) { // Spring injects this from query params
+
+
+            Page<BookingResponseDTO> bookings = bookingService.getBookingsByProvider(authentication, pageable);
+            return ResponseEntity.ok(bookings);
+
     }
 
     @GetMapping("/provider/pending")
     public ResponseEntity<?> getPendingBookings(Authentication authentication) {
         try {
-            Long providerId = extractUserId(authentication);
+            Long providerId = extractProviderId(authentication);
             return ResponseEntity.ok(bookingService.getPendingBookingsByProvider(providerId));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -113,12 +114,21 @@ public class BookingController {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private Long extractUserId(Authentication authentication) {
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new RuntimeException("User not authenticated");
+    private Long extractProviderId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("serviceProvider", false)) {
+            throw new RuntimeException("Unauthorized: You are not authorized to perform this operation.");
         }
-        Map<String, Object> principal = (Map<String, Object>) authentication.getPrincipal();
-        return Long.valueOf(principal.get("userId").toString());
+        Map<String, Object> profile = (Map<String, Object>) principal.get("serviceProviderProfile");
+        return ((Number) profile.get("providerId")).longValue();
+    }
+
+    private Long extractTravellerId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("traveller", false)) {
+            throw new RuntimeException("Unauthorized: You are not authorized to perform this operation..");
+        }
+        Map<String, Object> profile = (Map<String, Object>) principal.get("travellerProfile");
+        return ((Number) profile.get("travellerId")).longValue();
     }
 }

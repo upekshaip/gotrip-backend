@@ -15,4 +15,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByRefreshToken(String refreshToken);
 
     boolean existsByEmail(String email);
+
+    // Finds user by the ID inside the nested TravellerProfile object
+    Optional<User> findByTravellerProfile_TravellerId(Long travellerId);
+
+    // Finds user by the ID inside the nested ServiceProviderProfile object
+    Optional<User> findByServiceProviderProfile_ProviderId(Long providerId);
 }

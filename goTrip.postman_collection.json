@@ -16,7 +16,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"user18@gmail.com\",\r\n    \"password\": 123456\r\n}",
+              "raw": "{\r\n    \"email\": \"user32@gmail.com\",\r\n    \"password\": 123456\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -76,7 +76,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"user5@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+              "raw": "{\r\n    \"email\": \"upekshaip@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -239,6 +239,326 @@
       ]
     },
     {
+      "name": "Hotel Service",
+      "item": [
+        {
+          "name": "test /me",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/hotel-service/me",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "hotel-service",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create hotel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"asd 2\",\r\n    \"description\": \"asd des\",\r\n    \"address\": \"asd\",\r\n    \"city\": \"asd\",\r\n    \"price\": 10000,\r\n    \"priceUnit\": \"PER_DAY\",\r\n    \"latitude\": 10.45158,\r\n    \"longitude\": 45.26541,\r\n    \"imageUrl\": \"\",\r\n    \"isFeatured\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/hotel-service",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "hotel-service"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all active hotels",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"asd 2\",\r\n    \"description\": \"asd des\",\r\n    \"address\": \"asd\",\r\n    \"city\": \"asd\",\r\n    \"price\": 10000,\r\n    \"priceUnit\": \"PER_DAY\",\r\n    \"latitude\": 10.45158,\r\n    \"longitude\": 45.26541,\r\n    \"imageUrl\": \"\",\r\n    \"isFeatured\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/hotel-service",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "hotel-service"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get all active hotels owned by provider",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"asd 2\",\r\n    \"description\": \"asd des\",\r\n    \"address\": \"asd\",\r\n    \"city\": \"asd\",\r\n    \"price\": 10000,\r\n    \"priceUnit\": \"PER_DAY\",\r\n    \"latitude\": 10.45158,\r\n    \"longitude\": 45.26541,\r\n    \"imageUrl\": \"\",\r\n    \"isFeatured\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/hotel-service/my",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "hotel-service",
+                "my"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get hotel by hotelId",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Hotel 1\",\r\n    \"description\": \"Hotel 1 description\",\r\n    \"address\": \"Hotel 1, Address\",\r\n    \"city\": \"Gampaha\",\r\n    \"price\": 10000,\r\n    \"priceUnit\": \"PER_DAY\",\r\n    \"latitude\": 10.45158,\r\n    \"longitude\": 45.26541,\r\n    \"imageUrl\": \"\",\r\n    \"isFeatured\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/hotel-service/4",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "hotel-service",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "remove hotel",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Hotel 1\",\r\n    \"description\": \"Hotel 1 description\",\r\n    \"address\": \"Hotel 1, Address\",\r\n    \"city\": \"Gampaha\",\r\n    \"price\": 10000,\r\n    \"priceUnit\": \"PER_DAY\",\r\n    \"latitude\": 10.45158,\r\n    \"longitude\": 45.26541,\r\n    \"imageUrl\": \"\",\r\n    \"isFeatured\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/hotel-service/2",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "hotel-service",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update hotel",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Hotel 2\",\r\n    \"description\": \"Hotel 2 description\",\r\n    \"address\": \"Hotel 2, Address\",\r\n    \"city\": \"Gampaha\",\r\n    \"price\": 10000,\r\n    \"priceUnit\": \"PER_PERSON\",\r\n    \"latitude\": 10.45158,\r\n    \"longitude\": 45.26541,\r\n    \"imageUrl\": \"\",\r\n    \"isFeatured\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/hotel-service/2",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "hotel-service",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Hotel Booking",
+      "item": [
+        {
+          "name": "send a booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"hotelId\": 1,\r\n  \"personCount\": 2,\r\n  \"startingDate\": \"2027-03-05\",\r\n  \"startingTime\": \"08:00\",\r\n  \"endingDate\": \"2027-03-06\",\r\n  \"endingTime\": \"08:00\",\r\n  \"requestMessage\": \"Hello there! We are comming today!\",\r\n  \"roomCount\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/hotel-booking/request",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "hotel-booking",
+                "request"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "send a booking Copy",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"hotelId\": 1,\r\n  \"personCount\": 2,\r\n  \"startingDate\": \"2027-03-05\",\r\n  \"startingTime\": \"08:00\",\r\n  \"endingDate\": \"2027-03-06\",\r\n  \"endingTime\": \"08:00\",\r\n  \"requestMessage\": \"Hello there! We are comming today!\",\r\n  \"roomCount\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}/hotel-booking/my-bookings",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "hotel-booking",
+                "my-bookings"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "hello",
       "request": {
         "method": "GET",
@@ -286,14 +606,8 @@
       "value": ""
     },
     {
-      "key": "token",
-      "value": "",
-      "type": "default"
-    },
-    {
       "key": "accessToken",
-      "value": "",
-      "type": "default"
+      "value": ""
     }
   ]
 }

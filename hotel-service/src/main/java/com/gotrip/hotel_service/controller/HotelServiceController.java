@@ -3,9 +3,12 @@ package com.gotrip.hotel_service.controller;
 
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.common_library.dto.hotel_service.HotelCreateRequest;
+import com.gotrip.common_library.dto.hotel_service.HotelSummaryResponse;
+import com.gotrip.common_library.dto.hotel_service.enums.HotelStatus;
 import com.gotrip.hotel_service.service.HotelService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -32,13 +35,36 @@ public class HotelServiceController {
     }
 
     @GetMapping
-    public ResponseEntity<?> list() {
-        return ResponseEntity.ok(hotelService.getAllActive());
+    public ResponseEntity<Page<HotelSummaryResponse>> list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        return ResponseEntity.ok(hotelService.getAllActive(page, limit));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyHotels(
+            @RequestParam(required = false) HotelStatus status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            Authentication auth) {
+        return ResponseEntity.ok(hotelService.getMyAll(status, page, limit, auth));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
         return ResponseEntity.ok(hotelService.getById(id));
+    }
+
+    @GetMapping("traveller/{id}")
+    public ResponseEntity<?> getByTraveller(@PathVariable Long id) {
+        return ResponseEntity.ok(hotelService.getByIdForTraveller(id));
+    }
+
+
+    @GetMapping("/provider/{id}")
+    public ResponseEntity<?> getByProvider(@PathVariable Long id, @Valid @RequestBody HotelCreateRequest req, Authentication auth) {
+        return ResponseEntity.ok(hotelService.getByIdForProvider(id, auth));
     }
 
     @PutMapping("/{id}")
@@ -48,8 +74,7 @@ public class HotelServiceController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, Authentication auth) {
-        hotelService.delete(id, auth);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(hotelService.delete(id, auth));
     }
 
     @GetMapping("/me")

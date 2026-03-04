@@ -48,6 +48,9 @@ public class GatewayConfig {
 
                 .route("hotel_service_route", r -> r.path("/hotel-service/**")
                         .uri("lb://hotel-service"))
+
+                .route("transport_service_route", r -> r.path("/transport-service/**")
+                        .uri("lb://transport-service"))
           
                 .route("experience_route", r -> r.path("/experience/**")
                         .uri("lb://experience-service"))

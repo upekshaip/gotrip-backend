@@ -51,7 +51,7 @@ public class ExperienceBooking {
 
     private String providerMessage;
 
-    private String declineReason;
+    private String requestMessage;
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;

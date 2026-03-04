@@ -1,5 +1,7 @@
 package com.gotrip.common_library.dto.hotel_service;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -7,8 +9,13 @@ public record HotelBookingRequest(
         Long hotelId,
         int personCount,
         String requestMessage,
+        @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate startingDate,
+        @JsonFormat(pattern = "HH:mm")
         LocalTime startingTime,
+        @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate endingDate,
-        LocalTime endingTime
+        @JsonFormat(pattern = "HH:mm")
+        LocalTime endingTime,
+        int roomCount
 ) {}

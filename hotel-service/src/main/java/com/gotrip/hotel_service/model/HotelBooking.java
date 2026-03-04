@@ -1,6 +1,7 @@
 package com.gotrip.hotel_service.model;
 
 import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
+import com.gotrip.common_library.dto.hotel_service.enums.PriceUnit;
 import jakarta.persistence.*;
         import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +28,9 @@ public class HotelBooking {
     @Column(nullable = false)
     private Long travellerId;
 
+    @Column(nullable = false)
+    private Long providerId;
+
     @Column(unique = true, nullable = false)
     private String bookingReference; // e.g., GT-2026-X89
 
@@ -40,6 +44,16 @@ public class HotelBooking {
 
     @Column(nullable = false)
     private int personCount;
+
+    @Column(nullable = false)
+    private PriceUnit priceUnit;
+
+    // original price
+    @Column(nullable = false)
+    private BigDecimal basePrice;
+
+    @Column(nullable = false)
+    private int roomCount;
 
     @Column(nullable = false)
     private String requestMessage;

@@ -22,6 +22,9 @@ public record HotelCreateRequest(
         @Positive(message = "Price must be greater than zero")
         BigDecimal price,
 
+        @NotNull(message = "Discount price is required")
+        BigDecimal discount,
+
         @NotNull(message = "Price unit is required")
         PriceUnit priceUnit,
 

@@ -32,4 +32,21 @@ public class UserServiceClient {
             return new TravellerContactInfo("Unknown", "User", "N/A", "N/A");
         }
     }
+
+    public TravellerContactInfo getProviderContact(Long providerId) {
+        try {
+            return webClient.get()
+                    .uri("/user/internal/provider/{id}", providerId)
+                    .retrieve()
+                    .bodyToMono(TravellerContactInfo.class)
+                    .block(); // Blocks execution until the data arrives
+        } catch (Exception e) {
+            log.error("CRITICAL: WebClient failed for providerId {}. Error: {}", providerId, e.toString());
+            log.error("Error fetching traveller info for ID {}: {}", providerId, e.getMessage());
+            // Return a fallback object so the main list doesn't crash
+            return new TravellerContactInfo("Unknown", "User", "N/A", "N/A");
+        }
+    }
+
+
 }

@@ -53,9 +53,8 @@ public class HotelBookingService {
         booking.setHotelId(req.hotelId());
         booking.setProviderId(hotel.getProviderId());
 
-        // Ensure these setters exist in your HotelBooking entity
-        // booking.setBasePrice(hotel.getPrice());
-        // booking.setPriceUnit(hotel.getPriceUnit());
+         booking.setBasePrice(hotel.getPrice());
+         booking.setPriceUnit(hotel.getPriceUnit());
 
         booking.setBookingReference("GT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         booking.setStatus(BookingStatus.PENDING);
@@ -184,7 +183,7 @@ public class HotelBookingService {
                 b.getPersonCount(), b.getRoomCount(), b.getStartingDate(),
                 b.getStartingTime(), b.getEndingDate(), b.getEndingTime(),
                 b.getFinalAmount(), b.getRequestMessage(), b.getProviderMessage(),
-                b.getCreatedAt()
+                b.getCreatedAt(), b.getTotalAmount(), b.getDiscountAmount(), b.getBasePrice()
         );
     }
 

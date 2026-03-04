@@ -19,5 +19,9 @@ public record HotelBookingDTO(
         BigDecimal finalAmount,
         String requestMessage,
         String providerMessage,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        BigDecimal totalAmount,
+        BigDecimal discountAmount,
+        BigDecimal basePrice
+
 ) {}

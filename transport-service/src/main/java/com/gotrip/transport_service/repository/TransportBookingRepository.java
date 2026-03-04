@@ -1,6 +1,6 @@
 package com.gotrip.transport_service.repository;
 
-import com.gotrip.common_library.dto.transport_service.enums.BookingStatus;
+import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
 import com.gotrip.transport_service.model.TransportBooking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

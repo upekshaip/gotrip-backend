@@ -1,9 +1,6 @@
 package com.gotrip.hotel_service.service;
 
-import com.gotrip.common_library.dto.hotel_service.HotelBookingDTO;
-import com.gotrip.common_library.dto.hotel_service.HotelBookingRequest;
-import com.gotrip.common_library.dto.hotel_service.HotelBookingResponse;
-import com.gotrip.common_library.dto.hotel_service.HotelSummaryResponse;
+import com.gotrip.common_library.dto.hotel_service.*;
 import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
 import com.gotrip.common_library.dto.hotel_service.enums.PriceUnit;
 import com.gotrip.common_library.dto.user.TravellerContactInfo;
@@ -189,7 +186,7 @@ public class HotelBookingService {
 
 
     @Transactional
-    public HotelBooking respondToBooking(Long bookingId, BookingStatus newStatus, String message, Authentication auth) {
+    public HotelBooking respondToBooking(Long bookingId, HotelRespondDTO hotelRespondDTO, Authentication auth) {
         // 1. Fetch the booking
         HotelBooking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
@@ -212,8 +209,8 @@ public class HotelBookingService {
         }
 
         // 5. Update and Save
-        booking.setStatus(newStatus);
-        booking.setProviderMessage(message);
+        booking.setStatus(hotelRespondDTO.status());
+        booking.setProviderMessage(hotelRespondDTO.message());
         return bookingRepository.save(booking);
     }
 

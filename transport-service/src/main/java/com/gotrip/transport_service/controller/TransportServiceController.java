@@ -13,11 +13,11 @@ import tools.jackson.databind.ObjectMapper;
 public class TransportServiceController {
 
     private final ObjectMapper objectMapper;
-    private final TransportService transportService;
+//    private final TransportService transportService;
 
     public TransportServiceController(TransportService transportService, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.transportService = transportService;
+//        this.transportService = transportService;
     }
 
     @GetMapping("/me")

@@ -1,15 +1,21 @@
 package com.gotrip.experience_service.service;
 
+import com.gotrip.common_library.dto.user.TravellerContactInfo;
+import com.gotrip.experience_service.client.UserServiceClient;
 import com.gotrip.experience_service.dto.*;
 import com.gotrip.experience_service.model.Experience;
 import com.gotrip.experience_service.model.ExperienceBooking;
 import com.gotrip.experience_service.repository.ExperienceBookingRepository;
 import com.gotrip.experience_service.repository.ExperienceRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +32,7 @@ public class BookingService {
     private static final int URGENT_THRESHOLD_HOURS = 6;
     private static final int URGENT_EXPIRY_HOURS = 1;
     private static final int NORMAL_EXPIRY_HOURS = 24;
+    private final UserServiceClient userServiceClient;
 
     public BookingResponseDTO createBooking(BookingRequestDTO request, Long travellerId) {
         Experience experience = experienceRepository.findById(request.experienceId())
@@ -66,8 +73,9 @@ public class BookingService {
                 .expiresAt(LocalDateTime.now().plusHours(expiryHours))
                 .build();
 
+        TravellerContactInfo contact = userServiceClient.getTravellerContact(travellerId);
         ExperienceBooking saved = bookingRepository.save(booking);
-        return mapToResponse(saved);
+        return mapToResponse(saved, contact);
     }
 
     public BookingResponseDTO providerAction(Long bookingId, ProviderActionDTO actionDTO, Long providerId) {
@@ -97,9 +105,9 @@ public class BookingService {
         } else {
             throw new RuntimeException("Invalid action. Use ACCEPT or DECLINE");
         }
-
         ExperienceBooking saved = bookingRepository.save(booking);
-        return mapToResponse(saved);
+        TravellerContactInfo contact = userServiceClient.getTravellerContact(saved.getTravellerId());
+        return mapToResponse(saved, contact);
     }
 
     public BookingResponseDTO cancelBooking(Long bookingId, Long travellerId) {
@@ -116,34 +124,55 @@ public class BookingService {
 
         booking.setStatus("CANCELLED");
         ExperienceBooking saved = bookingRepository.save(booking);
-        return mapToResponse(saved);
+        TravellerContactInfo contact = userServiceClient.getTravellerContact(travellerId);
+        return mapToResponse(saved, contact);
     }
 
     public List<BookingResponseDTO> getBookingsByTraveller(Long travellerId) {
+        TravellerContactInfo contact = userServiceClient.getTravellerContact(travellerId);
         return bookingRepository.findByTravellerId(travellerId).stream()
-                .map(this::mapToResponse)
+                .map(booking -> mapToResponse(booking, contact))
                 .toList();
     }
 
-    public List<BookingResponseDTO> getBookingsByProvider(Long providerId) {
-        return bookingRepository.findByProviderId(providerId).stream()
-                .map(this::mapToResponse)
-                .toList();
+    public Page<BookingResponseDTO> getBookingsByProvider(Authentication authentication, Pageable pageable) {
+        Long providerId = extractProviderId(authentication);
+        Page<ExperienceBooking> bookingPage = bookingRepository.findByProviderId(providerId, pageable);
+
+        return bookingPage.map(booking -> {
+            // Fetch details for each traveller
+            TravellerContactInfo contact = userServiceClient.getTravellerContact(booking.getTravellerId());
+            return mapToResponse(booking, contact);
+        });
+    }
+
+    private Long extractProviderId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("serviceProvider", false)) {
+            throw new RuntimeException("Unauthorized: Only Service Providers can manage listings.");
+        }
+        Map<String, Object> profile = (Map<String, Object>) principal.get("serviceProviderProfile");
+        return ((Number) profile.get("providerId")).longValue();
     }
 
     public List<BookingResponseDTO> getPendingBookingsByProvider(Long providerId) {
         return bookingRepository.findByProviderIdAndStatus(providerId, "PENDING").stream()
-                .map(this::mapToResponse)
+                .map(booking -> {
+                    TravellerContactInfo contact = userServiceClient.getTravellerContact(booking.getTravellerId());
+                    return mapToResponse(booking, contact);
+                })
                 .toList();
     }
 
     public BookingResponseDTO getBookingById(Long bookingId) {
         ExperienceBooking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
-        return mapToResponse(booking);
+
+        TravellerContactInfo contact = userServiceClient.getTravellerContact(booking.getTravellerId());
+        return mapToResponse(booking, contact);
     }
 
-    private BookingResponseDTO mapToResponse(ExperienceBooking booking) {
+    private BookingResponseDTO mapToResponse(ExperienceBooking booking, TravellerContactInfo contact) {
         return new BookingResponseDTO(
                 booking.getBookingId(),
                 booking.getExperience().getExperienceId(),
@@ -162,7 +191,8 @@ public class BookingService {
                 booking.getDeclineReason(),
                 booking.getExpiresAt(),
                 booking.getCreatedAt(),
-                booking.getUpdatedAt()
+                booking.getUpdatedAt(),
+                contact // Injecting the external data here
         );
     }
 }

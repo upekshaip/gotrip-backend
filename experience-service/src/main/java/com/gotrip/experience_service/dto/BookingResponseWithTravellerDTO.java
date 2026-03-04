@@ -1,10 +1,12 @@
 package com.gotrip.experience_service.dto;
 
+import com.gotrip.common_library.dto.user.TravellerContactInfo;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-public record BookingResponseDTO(
+public record BookingResponseWithTravellerDTO(
         Long bookingId,
         Long experienceId,
         String experienceTitle,
@@ -23,4 +25,5 @@ public record BookingResponseDTO(
         LocalDateTime expiresAt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        com.gotrip.common_library.dto.user.TravellerContactInfo contact) {}
+        TravellerContactInfo travellerDetails // New field
+) {}

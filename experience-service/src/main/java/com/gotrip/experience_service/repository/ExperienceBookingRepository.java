@@ -1,6 +1,8 @@
 package com.gotrip.experience_service.repository;
 
 import com.gotrip.experience_service.model.ExperienceBooking;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +14,8 @@ public interface ExperienceBookingRepository extends JpaRepository<ExperienceBoo
 
     List<ExperienceBooking> findByTravellerId(Long travellerId);
 
-    List<ExperienceBooking> findByProviderId(Long providerId);
+    // In ExperienceBookingRepository.java
+    Page<ExperienceBooking> findByProviderId(Long providerId, Pageable pageable);
 
     List<ExperienceBooking> findByStatus(String status);
 

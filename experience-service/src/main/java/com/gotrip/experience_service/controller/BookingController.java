@@ -36,7 +36,7 @@ public class BookingController {
         }
     }
 
-    @PatchMapping("/{bookingId}/action")
+    @PatchMapping("/{bookingId}/respond")
     public ResponseEntity<?> providerAction(
             Authentication authentication,
             @PathVariable Long bookingId,
@@ -52,19 +52,12 @@ public class BookingController {
         }
     }
 
-    @PatchMapping("/{bookingId}/cancel")
-    public ResponseEntity<?> cancelBooking(
-            Authentication authentication,
-            @PathVariable Long bookingId) {
-        try {
-            Long travellerId = extractTravellerId(authentication);
-            BookingResponseDTO response = bookingService.cancelBooking(bookingId, travellerId);
+    @DeleteMapping("/{bookingId}/cancel")
+    public ResponseEntity<?> cancelBooking(Authentication authentication, @PathVariable Long bookingId) {
+
+            BookingResponseDTO response = bookingService.cancelBooking(bookingId, authentication);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ApiErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value(), System.currentTimeMillis())
-            );
-        }
+
     }
 
     @GetMapping("/{bookingId}")
@@ -80,26 +73,16 @@ public class BookingController {
     }
 
     @GetMapping("/my-bookings")
-    public ResponseEntity<?> getMyBookings(Authentication authentication) {
-        try {
-            Long travellerId = extractTravellerId(authentication);
-            return ResponseEntity.ok(bookingService.getBookingsByTraveller(travellerId));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ApiErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value(), System.currentTimeMillis())
-            );
-        }
+    public ResponseEntity<?> getMyBookings(Authentication authentication, Pageable pageable) {
+        Page<ProviderBookingDetailDTO> bookings = bookingService.getBookingsByTraveller(authentication, pageable);
+        return ResponseEntity.ok(bookings);
+
     }
 
     @GetMapping("/provider/all")
-    public ResponseEntity<?> getProviderBookings(
-            Authentication authentication,
-            Pageable pageable) { // Spring injects this from query params
-
-
-            Page<BookingResponseDTO> bookings = bookingService.getBookingsByProvider(authentication, pageable);
+    public ResponseEntity<?> getProviderBookings(Authentication authentication,Pageable pageable) { // Spring injects this from query params
+            Page<ProviderBookingDetailDTO> bookings = bookingService.getBookingsByProvider(authentication, pageable);
             return ResponseEntity.ok(bookings);
-
     }
 
     @GetMapping("/provider/pending")

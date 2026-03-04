@@ -5,6 +5,7 @@ import com.gotrip.experience_service.client.UserServiceClient;
 import com.gotrip.experience_service.dto.*;
 import com.gotrip.experience_service.model.Experience;
 import com.gotrip.experience_service.model.ExperienceBooking;
+import com.gotrip.experience_service.model.enums.BookingStatus;
 import com.gotrip.experience_service.repository.ExperienceBookingRepository;
 import com.gotrip.experience_service.repository.ExperienceRepository;
 import lombok.RequiredArgsConstructor;
@@ -96,21 +97,22 @@ public class BookingService {
             throw new RuntimeException("Booking request has expired");
         }
 
-        if ("ACCEPT".equalsIgnoreCase(actionDTO.action())) {
+        booking.setProviderMessage(actionDTO.message());
+        if (actionDTO.status() == BookingStatus.ACCEPTED) {
             booking.setStatus("ACCEPTED");
-            booking.setProviderMessage(actionDTO.message());
-        } else if ("DECLINE".equalsIgnoreCase(actionDTO.action())) {
+        } else if (actionDTO.status() == BookingStatus.DECLINED) {
             booking.setStatus("DECLINED");
-            booking.setDeclineReason(actionDTO.declineReason());
         } else {
-            throw new RuntimeException("Invalid action. Use ACCEPT or DECLINE");
+            throw new RuntimeException("Invalid action. Use ACCEPTED or DECLINED");
         }
         ExperienceBooking saved = bookingRepository.save(booking);
         TravellerContactInfo contact = userServiceClient.getTravellerContact(saved.getTravellerId());
         return mapToResponse(saved, contact);
     }
 
-    public BookingResponseDTO cancelBooking(Long bookingId, Long travellerId) {
+    public BookingResponseDTO cancelBooking(Long bookingId, Authentication authentication) {
+        Long travellerId = extractTravellerId(authentication);
+
         ExperienceBooking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
@@ -128,31 +130,80 @@ public class BookingService {
         return mapToResponse(saved, contact);
     }
 
-    public List<BookingResponseDTO> getBookingsByTraveller(Long travellerId) {
-        TravellerContactInfo contact = userServiceClient.getTravellerContact(travellerId);
-        return bookingRepository.findByTravellerId(travellerId).stream()
-                .map(booking -> mapToResponse(booking, contact))
-                .toList();
-    }
+    public Page<ProviderBookingDetailDTO> getBookingsByTraveller(Authentication authentication, Pageable pageable) {
+        Long travellerId = extractTravellerId(authentication);
 
-    public Page<BookingResponseDTO> getBookingsByProvider(Authentication authentication, Pageable pageable) {
-        Long providerId = extractProviderId(authentication);
-        Page<ExperienceBooking> bookingPage = bookingRepository.findByProviderId(providerId, pageable);
+        // Fetch the traveller's own contact info once
+        TravellerContactInfo contact = userServiceClient.getTravellerContact(travellerId);
+
+        // Fetch paginated bookings with experience details
+        Page<ExperienceBooking> bookingPage = bookingRepository.findByTravellerIdWithExperience(travellerId, pageable);
 
         return bookingPage.map(booking -> {
-            // Fetch details for each traveller
-            TravellerContactInfo contact = userServiceClient.getTravellerContact(booking.getTravellerId());
-            return mapToResponse(booking, contact);
+            // 1. Map the standard BookingResponseDTO
+            BookingResponseDTO bookingDto = mapToResponse(booking, contact);
+
+            // 2. Manually map the Experience entity to ExperienceResponseDTO
+            Experience exp = booking.getExperience();
+            ExperienceResponseDTO expDto = new ExperienceResponseDTO(
+                    exp.getExperienceId(),
+                    exp.getTitle(),
+                    exp.getDescription(),
+                    exp.getCategory(),
+                    exp.getType(),
+                    exp.getLocation(),
+                    exp.getPricePerUnit(),
+                    exp.getPriceUnit(),
+                    exp.getMaxCapacity(),
+                    exp.getImageUrl(),
+                    exp.isAvailable(),
+                    exp.getProviderId(),
+                    exp.getCreatedAt(),
+                    exp.getUpdatedAt()
+            );
+
+            // 3. Return the combined wrapper
+            return new ProviderBookingDetailDTO(bookingDto, expDto);
         });
     }
 
-    private Long extractProviderId(Authentication auth) {
-        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
-        if (!(boolean) principal.getOrDefault("serviceProvider", false)) {
-            throw new RuntimeException("Unauthorized: Only Service Providers can manage listings.");
-        }
-        Map<String, Object> profile = (Map<String, Object>) principal.get("serviceProviderProfile");
-        return ((Number) profile.get("providerId")).longValue();
+
+
+    public Page<ProviderBookingDetailDTO> getBookingsByProvider(Authentication authentication, Pageable pageable) {
+        Long providerId = extractProviderId(authentication);
+
+        // Fetch bookings along with experience data to avoid N+1 issues
+        Page<ExperienceBooking> bookingPage = bookingRepository.findByProviderIdWithExperience(providerId, pageable);
+
+        return bookingPage.map(booking -> {
+            // 1. Fetch external traveller details
+            TravellerContactInfo contact = userServiceClient.getTravellerContact(booking.getTravellerId());
+
+            // 2. Map the standard BookingResponseDTO
+            BookingResponseDTO bookingDto = mapToResponse(booking, contact);
+
+            // 3. Manually map the Experience entity to ExperienceResponseDTO
+            Experience exp = booking.getExperience();
+            ExperienceResponseDTO expDto = new ExperienceResponseDTO(
+                    exp.getExperienceId(),
+                    exp.getTitle(),
+                    exp.getDescription(),
+                    exp.getCategory(),
+                    exp.getType(),
+                    exp.getLocation(),
+                    exp.getPricePerUnit(),
+                    exp.getPriceUnit(),
+                    exp.getMaxCapacity(),
+                    exp.getImageUrl(),
+                    exp.isAvailable(),
+                    exp.getProviderId(),
+                    exp.getCreatedAt(),
+                    exp.getUpdatedAt()
+            );
+
+            // 4. Return the combined wrapper
+            return new ProviderBookingDetailDTO(bookingDto, expDto);
+        });
     }
 
     public List<BookingResponseDTO> getPendingBookingsByProvider(Long providerId) {
@@ -188,11 +239,29 @@ public class BookingService {
                 booking.getTotalPrice(),
                 booking.getStatus(),
                 booking.getProviderMessage(),
-                booking.getDeclineReason(),
+                booking.getRequestMessage(),
                 booking.getExpiresAt(),
                 booking.getCreatedAt(),
                 booking.getUpdatedAt(),
                 contact // Injecting the external data here
         );
+    }
+
+    private Long extractTravellerId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("traveller", false)) {
+            throw new RuntimeException("Unauthorized: You are not authorized to perform this operation..");
+        }
+        Map<String, Object> profile = (Map<String, Object>) principal.get("travellerProfile");
+        return ((Number) profile.get("travellerId")).longValue();
+    }
+
+    private Long extractProviderId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("serviceProvider", false)) {
+            throw new RuntimeException("Unauthorized: Only Service Providers can manage listings.");
+        }
+        Map<String, Object> profile = (Map<String, Object>) principal.get("serviceProviderProfile");
+        return ((Number) profile.get("providerId")).longValue();
     }
 }

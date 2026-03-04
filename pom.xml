@@ -26,6 +26,8 @@
         <module>hotel-service</module>
         <module>experience-service</module>
         <module>my-gateway</module>
+        <module>transport-service</module>
+
     </modules>
 
     <dependencyManagement>

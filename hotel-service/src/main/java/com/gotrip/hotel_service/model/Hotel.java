@@ -50,6 +50,9 @@ public class Hotel {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal discount;
+
     // Geographic Coordinates
     @Column(nullable = false)
     private Double latitude;

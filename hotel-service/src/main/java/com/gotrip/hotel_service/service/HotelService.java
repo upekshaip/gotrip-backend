@@ -1,6 +1,7 @@
 package com.gotrip.hotel_service.service;
 
 import com.gotrip.common_library.dto.hotel_service.HotelCreateRequest;
+import com.gotrip.common_library.dto.hotel_service.HotelSummaryResponse;
 import com.gotrip.common_library.dto.hotel_service.enums.HotelStatus;
 import com.gotrip.hotel_service.model.Hotel;
 import com.gotrip.hotel_service.repository.HotelRepository;
@@ -35,10 +36,30 @@ public class HotelService {
         return hotelRepository.save(hotel);
     }
 
-    public List<Hotel> getAllActive() {
-        return hotelRepository.findAll().stream()
-                .filter(h -> h.getStatus() == HotelStatus.ACTIVE)
-                .toList();
+    public Page<HotelSummaryResponse> getAllActive(int page, int limit) {
+        // 0-indexed page for Spring Data, sorting by featured first, then newest
+        Pageable pageable = PageRequest.of(page - 1, limit,
+                Sort.by(Sort.Direction.DESC, "isFeatured")
+                        .and(Sort.by(Sort.Direction.DESC, "updatedAt")));
+
+        Page<Hotel> hotelPage = hotelRepository.findByStatus(HotelStatus.ACTIVE, pageable);
+
+        // Map the Entity to our Response DTO
+        return hotelPage.map(h -> new HotelSummaryResponse(
+                h.getHotelId(),
+                h.getName(),
+                h.getDescription(),
+                h.getAddress(),
+                h.getCity(),
+                h.getImageUrl(),
+                h.getPriceUnit(),
+                h.getPrice(),
+                h.getDiscount(),
+                h.isFeatured(),
+                h.getStatus(),
+                h.getProviderId(),
+                h.getUpdatedAt()
+        ));
     }
 
     public Page<Hotel> getMyAll(HotelStatus status, int page, int limit, Authentication auth) {
@@ -112,5 +133,6 @@ public class HotelService {
         hotel.setLongitude(req.longitude());
         hotel.setImageUrl(req.imageUrl());
         hotel.setFeatured(req.featured());
+        hotel.setDiscount(req.discount());
     }
 }

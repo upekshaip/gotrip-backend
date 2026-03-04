@@ -3,10 +3,12 @@ package com.gotrip.hotel_service.controller;
 
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.common_library.dto.hotel_service.HotelCreateRequest;
+import com.gotrip.common_library.dto.hotel_service.HotelSummaryResponse;
 import com.gotrip.common_library.dto.hotel_service.enums.HotelStatus;
 import com.gotrip.hotel_service.service.HotelService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,8 +35,11 @@ public class HotelServiceController {
     }
 
     @GetMapping
-    public ResponseEntity<?> list() {
-        return ResponseEntity.ok(hotelService.getAllActive());
+    public ResponseEntity<Page<HotelSummaryResponse>> list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        return ResponseEntity.ok(hotelService.getAllActive(page, limit));
     }
 
     @GetMapping("/my")

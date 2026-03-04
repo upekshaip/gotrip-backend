@@ -2,6 +2,7 @@ package com.gotrip.hotel_service.service;
 
 import com.gotrip.common_library.dto.hotel_service.HotelBookingRequest;
 import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
+import com.gotrip.common_library.dto.hotel_service.enums.PriceUnit;
 import com.gotrip.hotel_service.model.Hotel;
 import com.gotrip.hotel_service.model.HotelBooking;
 import com.gotrip.hotel_service.repository.HotelBookingRepository;
@@ -28,32 +29,84 @@ public class HotelBookingService {
     public HotelBooking createBookingRequest(HotelBookingRequest req, Authentication auth) {
         Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
 
-        // Extract travellerId from the nested travellerProfile
+        // 1. Extract travellerId safely
         Map<String, Object> travellerProfile = (Map<String, Object>) principal.get("travellerProfile");
         if (travellerProfile == null) {
             throw new RuntimeException("User does not have a Traveller profile.");
         }
         Long travellerId = ((Number) travellerProfile.get("travellerId")).longValue();
 
+        // 2. Fetch Hotel
         Hotel hotel = hotelRepository.findById(req.hotelId())
                 .orElseThrow(() -> new RuntimeException("Hotel not found"));
 
+        // 3. Initialize Booking
         HotelBooking booking = new HotelBooking();
-        booking.setTravellerId(travellerId); // Correctly using 28, not userId
+        booking.setTravellerId(travellerId);
         booking.setHotelId(req.hotelId());
+        booking.setProviderId(hotel.getProviderId());
+        booking.setBasePrice(hotel.getPrice());
+        booking.setPriceUnit(hotel.getPriceUnit());
+
         booking.setBookingReference("GT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         booking.setStatus(BookingStatus.PENDING);
 
-        // ... rest of mapping (dates, times, personCount)
+        // Mapping requested data
+        booking.setStartingDate(req.startingDate());
+        booking.setStartingTime(req.startingTime());
+        booking.setEndingDate(req.endingDate());
+        booking.setEndingTime(req.endingTime());
+        booking.setPersonCount(req.personCount());
+        booking.setRequestMessage(req.requestMessage());
 
-        // Price calculation
-        long days = ChronoUnit.DAYS.between(req.startingDate(), req.endingDate());
-        if (days <= 0) days = 1;
-        BigDecimal total = hotel.getPrice().multiply(BigDecimal.valueOf(days));
+        // 4. Advanced Price Calculation
+        // roomCount logic integrated
+        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal discount = hotel.getDiscount() != null ? hotel.getDiscount() : BigDecimal.ZERO;
 
+        if (hotel.getPriceUnit() == PriceUnit.PER_DAY) {
+            long days = ChronoUnit.DAYS.between(req.startingDate(), req.endingDate());
+            if (days <= 0) days = 1;
+
+            // Total = (Price per Room) * (Number of Rooms) * (Number of Days)
+            total = hotel.getPrice()
+                    .multiply(BigDecimal.valueOf(req.roomCount()))
+                    .multiply(BigDecimal.valueOf(days));
+
+        } else if (hotel.getPriceUnit() == PriceUnit.PER_HOUR) {
+            LocalDateTime start = LocalDateTime.of(req.startingDate(), req.startingTime());
+            LocalDateTime end = LocalDateTime.of(req.endingDate(), req.endingTime());
+            long hours = ChronoUnit.HOURS.between(start, end);
+            if (hours <= 0) hours = 1;
+
+            // Total = (Price per Room per Hour) * (Number of Rooms) * (Number of Hours)
+            total = hotel.getPrice()
+                    .multiply(BigDecimal.valueOf(req.roomCount()))
+                    .multiply(BigDecimal.valueOf(hours));
+
+        } else if (hotel.getPriceUnit() == PriceUnit.PER_PERSON) {
+            long days = ChronoUnit.DAYS.between(req.startingDate(), req.endingDate());
+            if (days <= 0) days = 1;
+
+            // Total = (Price per Person) * (Number of Persons) * (Number of Days)
+            // Note: roomCount is usually implied by personCount here,
+            // but if you want to charge per person AND per room, add the multiplier.
+            total = hotel.getPrice()
+                    .multiply(BigDecimal.valueOf(req.personCount()))
+                    .multiply(BigDecimal.valueOf(days));
+        }
+
+
+        // Final assignment
+        booking.setRoomCount(req.roomCount());
         booking.setTotalAmount(total);
-        booking.setFinalAmount(total);
+        booking.setDiscountAmount(discount);
+        BigDecimal finalPrice = total.subtract(discount);
+        if (finalPrice.compareTo(BigDecimal.ZERO) < 0) {
+            finalPrice = BigDecimal.ZERO;
+        }
 
+        booking.setFinalAmount(finalPrice);
         return bookingRepository.save(booking);
     }
 

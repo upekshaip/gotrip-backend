@@ -17,6 +17,9 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     // Find all hotels that are NOT removed (for general browsing)
     List<Hotel> findByStatusNot(HotelStatus status);
 
+    // Inside HotelRepository.java
+    Page<Hotel> findByStatus(HotelStatus status, Pageable pageable);
+
     // Find a specific hotel by ID but only if it's not removed
     Optional<Hotel> findByHotelIdAndStatusNot(Long hotelId, HotelStatus status);
 

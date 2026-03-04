@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/hotel-bookings")
+@RequestMapping("/hotel-booking")
 @RequiredArgsConstructor
 public class HotelBookingController {
 

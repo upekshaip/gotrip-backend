@@ -7,6 +7,7 @@ import com.gotrip.common_library.dto.user.UserProfileUpdateRequest;
 import com.gotrip.user_service.model.User;
 import com.gotrip.user_service.repository.UserRepository;
 import com.gotrip.user_service.service.SignupService;
+import com.gotrip.user_service.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -23,10 +24,12 @@ public class UserController {
 
     private final ObjectMapper objectMapper;
     private final SignupService signupService;
+    private final UserService userService;
 
-    public UserController(UserRepository userRepository, ObjectMapper objectMapper, SignupService signupService) {
+    public UserController(UserRepository userRepository, ObjectMapper objectMapper, SignupService signupService, UserService userService) {
         this.objectMapper = objectMapper;
         this.signupService = signupService;
+        this.userService = userService;
     }
 
     @GetMapping("/me")
@@ -88,6 +91,28 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ApiErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value(), System.currentTimeMillis())
             );
+        }
+    }
+
+    // Internal call to get traveller contact info
+    @GetMapping("/internal/traveller/{travellerId}")
+    public ResponseEntity<?> getTravellerInfo(@PathVariable Long travellerId) {
+        try {
+            // signupService should have a method to find User by travellerId
+            return ResponseEntity.ok(userService.getTravellerContact(travellerId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    // Internal call to get provider contact info
+    @GetMapping("/internal/provider/{providerId}")
+    public ResponseEntity<?> getProviderInfo(@PathVariable Long providerId) {
+        try {
+            // signupService should have a method to find User by providerId
+            return ResponseEntity.ok(userService.getProviderContact(providerId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

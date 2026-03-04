@@ -56,6 +56,17 @@ public class HotelServiceController {
         return ResponseEntity.ok(hotelService.getById(id));
     }
 
+    @GetMapping("traveller/{id}")
+    public ResponseEntity<?> getByTraveller(@PathVariable Long id) {
+        return ResponseEntity.ok(hotelService.getByIdForTraveller(id));
+    }
+
+
+    @GetMapping("/provider/{id}")
+    public ResponseEntity<?> getByProvider(@PathVariable Long id, @Valid @RequestBody HotelCreateRequest req, Authentication auth) {
+        return ResponseEntity.ok(hotelService.getByIdForProvider(id, auth));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody HotelCreateRequest req, Authentication auth) {
         return ResponseEntity.ok(hotelService.update(id, req, auth));

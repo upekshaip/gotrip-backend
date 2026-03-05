@@ -37,7 +37,7 @@ public class HotelService {
         Hotel hotel = new Hotel();
         mapDtoToEntity(request, hotel);
         hotel.setProviderId(providerId);
-        hotel.setStatus(HotelStatus.PENDING); // Auto-active on creation
+        hotel.setStatus(HotelStatus.ACTIVE); // Auto-active on creation
         return hotelRepository.save(hotel);
     }
 

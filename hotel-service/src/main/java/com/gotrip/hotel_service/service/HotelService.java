@@ -2,6 +2,7 @@ package com.gotrip.hotel_service.service;
 
 import com.gotrip.common_library.dto.hotel_service.HotelCreateRequest;
 import com.gotrip.common_library.dto.hotel_service.HotelSummaryResponse;
+import com.gotrip.common_library.dto.hotel_service.UpdateStatusRequest;
 import com.gotrip.common_library.dto.hotel_service.enums.HotelStatus;
 import com.gotrip.common_library.dto.user.TravellerContactInfo;
 import com.gotrip.hotel_service.client.UserServiceClient;
@@ -37,7 +38,7 @@ public class HotelService {
         Hotel hotel = new Hotel();
         mapDtoToEntity(request, hotel);
         hotel.setProviderId(providerId);
-        hotel.setStatus(HotelStatus.ACTIVE); // Auto-active on creation
+        hotel.setStatus(HotelStatus.PENDING);
         return hotelRepository.save(hotel);
     }
 
@@ -117,6 +118,23 @@ public class HotelService {
     }
 
     @Transactional
+    public Hotel updateByAdmin(Long id, HotelCreateRequest request, Authentication auth) {
+        extractAdminId(auth);
+
+        Hotel hotel = getById(id);
+        mapDtoToEntity(request, hotel);
+        return hotelRepository.save(hotel);
+    }
+
+    public Hotel updateStatusByAdmin(Long id, UpdateStatusRequest request, Authentication auth) {
+        extractAdminId(auth);
+
+        Hotel hotel = getById(id);
+        hotel.setStatus(request.status());
+        return hotelRepository.save(hotel);
+    }
+
+    @Transactional
     public Hotel delete(Long id, Authentication auth) {
         Hotel hotel = getById(id);
         validateOwnership(hotel, auth);
@@ -128,6 +146,47 @@ public class HotelService {
         // Hard Delete all associated reviews
         reviewRepository.deleteAllByHotel_HotelId(id);
         return  hotel;
+    }
+
+    public Page<Hotel> getAllHotelsByAdmin(Authentication authentication, int page, int limit) {
+        extractAdminId(authentication);
+        // 0-indexed PageRequest, sorting by newest updated
+        Pageable pageable = PageRequest.of(page - 1, limit,
+                Sort.by(Sort.Direction.DESC, "updatedAt"));
+
+        Page<Hotel> hotelPage = hotelRepository.findAll(pageable);
+
+        return hotelPage;
+    }
+
+    public Page<Hotel> getPendingHotelsByAdmin(Authentication authentication, int page, int limit) {
+        extractAdminId(authentication);
+
+        Pageable pageable = PageRequest.of(page - 1, limit,
+                Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        // Assuming HotelStatus is an Enum or String; adjust based on your model
+        Page<Hotel> hotelPage = hotelRepository.findByStatus(HotelStatus.PENDING, pageable);
+        return hotelPage;
+    }
+
+    // Helper mapper (reusing your existing logic)
+    private HotelSummaryResponse mapToSummaryResponse(Hotel h) {
+        return new HotelSummaryResponse(
+                h.getHotelId(),
+                h.getName(),
+                h.getDescription(),
+                h.getAddress(),
+                h.getCity(),
+                h.getImageUrl(),
+                h.getPriceUnit(),
+                h.getPrice(),
+                h.getDiscount(),
+                h.isFeatured(),
+                h.getStatus(),
+                h.getProviderId(),
+                h.getUpdatedAt()
+        );
     }
 
     private void validateOwnership(Hotel hotel, Authentication auth) {
@@ -145,6 +204,8 @@ public class HotelService {
         return ((Number) profile.get("providerId")).longValue();
     }
 
+
+
     private void mapDtoToEntity(HotelCreateRequest req, Hotel hotel) {
         hotel.setName(req.name());
         hotel.setDescription(req.description());
@@ -157,5 +218,14 @@ public class HotelService {
         hotel.setImageUrl(req.imageUrl());
         hotel.setFeatured(req.featured());
         hotel.setDiscount(req.discount());
+    }
+
+    private Long extractAdminId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("admin", false)) {
+            throw new RuntimeException("Unauthorized: Only admins can manage listings.");
+        }
+        Map<String, Object> profile = (Map<String, Object>) principal.get("adminProfile");
+        return ((Number) profile.get("adminId")).longValue();
     }
 }

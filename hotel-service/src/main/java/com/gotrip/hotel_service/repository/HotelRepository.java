@@ -20,6 +20,8 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     // Inside HotelRepository.java
     Page<Hotel> findByStatus(HotelStatus status, Pageable pageable);
 
+    Page<Hotel> findAll(Pageable pageable);
+
     // Find a specific hotel by ID but only if it's not removed
     Optional<Hotel> findByHotelIdAndStatusNot(Long hotelId, HotelStatus status);
 
@@ -45,5 +47,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
             HotelStatus excludeStatus,
             Pageable pageable
     );
+
+    // In HotelRepository.java
 
 }

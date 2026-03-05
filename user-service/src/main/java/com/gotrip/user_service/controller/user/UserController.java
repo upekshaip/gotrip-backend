@@ -153,4 +153,17 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    // External call to get traveller contact info
+    @GetMapping("/admin/traveller/{travellerId}")
+    public ResponseEntity<?> getOutsideTravellerInfo(@PathVariable Long travellerId) {
+            // signupService should have a method to find User by travellerId
+            return ResponseEntity.ok(userService.getTravellerContact(travellerId));
+    }
+
+    // External call to get provider contact info
+    @GetMapping("/admin/provider/{providerId}")
+    public ResponseEntity<?> getOutsideProviderInfo(@PathVariable Long providerId) {
+            return ResponseEntity.ok(userService.getProviderContact(providerId));
+    }
 }

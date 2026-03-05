@@ -4,7 +4,9 @@ package com.gotrip.hotel_service.controller;
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.common_library.dto.hotel_service.HotelCreateRequest;
 import com.gotrip.common_library.dto.hotel_service.HotelSummaryResponse;
+import com.gotrip.common_library.dto.hotel_service.UpdateStatusRequest;
 import com.gotrip.common_library.dto.hotel_service.enums.HotelStatus;
+import com.gotrip.hotel_service.model.Hotel;
 import com.gotrip.hotel_service.service.HotelService;
 
 import jakarta.validation.Valid;
@@ -72,6 +74,16 @@ public class HotelServiceController {
         return ResponseEntity.ok(hotelService.update(id, req, auth));
     }
 
+    @PutMapping("admin/{id}")
+    public ResponseEntity<?> updateByAdmin(@PathVariable Long id, @Valid @RequestBody HotelCreateRequest req, Authentication auth) {
+        return ResponseEntity.ok(hotelService.updateByAdmin(id, req, auth));
+    }
+
+    @PutMapping("admin/status/{id}")
+    public ResponseEntity<?> updateStatusByAdmin(@PathVariable Long id, @Valid @RequestBody UpdateStatusRequest req, Authentication auth) {
+        return ResponseEntity.ok(hotelService.updateStatusByAdmin(id, req, auth));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, Authentication auth) {
         return ResponseEntity.ok(hotelService.delete(id, auth));
@@ -83,4 +95,22 @@ public class HotelServiceController {
         return ResponseEntity.ok(authentication.getPrincipal());
 
     }
+
+    @GetMapping("admin/all")
+    public ResponseEntity<Page<Hotel>> getAllHotelsByAdmin(
+            Authentication authentication,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(hotelService.getAllHotelsByAdmin(authentication, page, limit));
+    }
+
+    @GetMapping("admin/pending")
+    public ResponseEntity<Page<Hotel>> getPendingHotelsByAdmin(
+            Authentication authentication,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(hotelService.getPendingHotelsByAdmin(authentication, page, limit));
+    }
+
+
 }

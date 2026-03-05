@@ -68,6 +68,14 @@ public class TransportService {
         reviewRepository.deleteAllByTransport_TransportId(id);
     }
 
+    public long countAll() {
+        return transportRepository.count();
+    }
+
+    public long countActive() {
+        return transportRepository.countByStatus(TransportStatus.ACTIVE);
+    }
+
     private void validateOwnership(Transport transport, Authentication auth) {
         if (!transport.getProviderId().equals(extractProviderId(auth))) {
             throw new RuntimeException("Access Denied: Ownership verification failed.");

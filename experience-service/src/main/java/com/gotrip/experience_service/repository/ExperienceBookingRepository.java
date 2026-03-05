@@ -23,6 +23,8 @@ public interface ExperienceBookingRepository extends JpaRepository<ExperienceBoo
 
     List<ExperienceBooking> findByProviderIdAndStatus(Long providerId, String status);
 
+    long countByStatus(String status);
+
     List<ExperienceBooking> findByTravellerIdAndStatus(Long travellerId, String status);
 
     List<ExperienceBooking> findByExpiresAtBeforeAndStatus(LocalDateTime dateTime, String status);

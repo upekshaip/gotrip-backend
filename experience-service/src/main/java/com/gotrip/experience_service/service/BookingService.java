@@ -224,6 +224,14 @@ public class BookingService {
         return mapToResponse(booking, contact);
     }
 
+    public long countAll() {
+        return bookingRepository.count();
+    }
+
+    public long countPending() {
+        return bookingRepository.countByStatus("PENDING");
+    }
+
     private BookingResponseDTO mapToResponse(ExperienceBooking booking, TravellerContactInfo contact) {
         return new BookingResponseDTO(
                 booking.getBookingId(),

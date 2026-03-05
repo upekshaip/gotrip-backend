@@ -120,6 +120,14 @@ public class ExperienceService {
                 .toList();
     }
 
+    public long countAll() {
+        return experienceRepository.count();
+    }
+
+    public long countAvailable() {
+        return experienceRepository.countByAvailableTrue();
+    }
+
     public Page<Experience> getAllExperiencesByAdmin(Authentication auth, int page, int limit, String filter) {
         extractAdminId(auth); // Ensure admin is authorized
 

@@ -25,4 +25,6 @@ public interface TransportBookingRepository extends JpaRepository<TransportBooki
 
     // Find bookings eligible for review (Completed rides that don't have a reviewId yet)
     List<TransportBooking> findByTravellerIdAndStatusAndReviewIdIsNull(Long travellerId, BookingStatus status);
+
+    long countByStatus(BookingStatus status);
 }

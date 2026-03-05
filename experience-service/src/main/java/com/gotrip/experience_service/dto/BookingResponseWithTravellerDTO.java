@@ -21,7 +21,7 @@ public record BookingResponseWithTravellerDTO(
         double totalPrice,
         String status,
         String providerMessage,
-        String declineReason,
+        String requestMessage,
         LocalDateTime expiresAt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,

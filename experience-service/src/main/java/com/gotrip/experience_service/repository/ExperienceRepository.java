@@ -1,6 +1,8 @@
 package com.gotrip.experience_service.repository;
 
 import com.gotrip.experience_service.model.Experience;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,7 +11,8 @@ import java.util.List;
 @Repository
 public interface ExperienceRepository extends JpaRepository<Experience, Long> {
 
-    List<Experience> findByProviderId(Long providerId);
+    // In ExperienceRepository.java
+    Page<Experience> findByProviderId(Long providerId, Pageable pageable);
 
     List<Experience> findByCategory(String category);
 
@@ -17,7 +20,8 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
 
     List<Experience> findByLocation(String location);
 
-    List<Experience> findByAvailableTrue();
+    // In ExperienceRepository.java
+    Page<Experience> findByAvailableTrue(Pageable pageable);
 
     List<Experience> findByCategoryAndAvailableTrue(String category);
 

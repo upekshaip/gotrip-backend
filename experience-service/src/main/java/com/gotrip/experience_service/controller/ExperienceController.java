@@ -5,6 +5,8 @@ import com.gotrip.experience_service.dto.*;
 import com.gotrip.experience_service.service.ExperienceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -67,14 +69,9 @@ public class ExperienceController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getExperienceById(@PathVariable Long id) {
-        try {
-            ExperienceResponseDTO response = experienceService.getExperienceById(id);
+            Map<String, Object> response = experienceService.getExperienceById(id);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ApiErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND.value(), System.currentTimeMillis())
-            );
-        }
+
     }
 
     @GetMapping("/all")
@@ -83,8 +80,13 @@ public class ExperienceController {
     }
 
     @GetMapping("/available")
-    public ResponseEntity<?> getAvailableExperiences() {
-        return ResponseEntity.ok(experienceService.getAvailableExperiences());
+    public ResponseEntity<Page<ExperienceResponseDTO>> getAvailableExperiences(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        // page - 1 because internal Spring Data logic is 0-indexed
+        Page<ExperienceResponseDTO> result = experienceService.getAvailableExperiences(page, limit);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/category/{category}")
@@ -98,15 +100,15 @@ public class ExperienceController {
     }
 
     @GetMapping("/my-listings")
-    public ResponseEntity<?> getMyListings(Authentication authentication) {
-        try {
-            Long providerId = extractProviderId(authentication);
-            return ResponseEntity.ok(experienceService.getExperiencesByProvider(providerId));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ApiErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value(), System.currentTimeMillis())
-            );
-        }
+    public ResponseEntity<Page<ExperienceResponseDTO>> getMyListings(
+            Authentication authentication,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit)
+    {
+        Long providerId = extractProviderId(authentication);
+        Page<ExperienceResponseDTO> result = experienceService.getExperiencesByProvider(providerId, page, limit);
+        return ResponseEntity.ok(result);
+
     }
 
     @SuppressWarnings("unchecked")

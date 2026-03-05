@@ -1,4 +1,5 @@
 package com.gotrip.transport_service.controller;
+
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.common_library.dto.transport_service.TransportCreateRequest;
 import com.gotrip.transport_service.service.TransportService;
@@ -21,8 +22,6 @@ public class TransportServiceController {
 //        this.transportService = transportService;
     }
 
-    // Vehicle Management Endpoints
-
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody TransportCreateRequest req, Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED).body(transportService.createTransport(req, auth));
@@ -31,6 +30,12 @@ public class TransportServiceController {
     @GetMapping
     public ResponseEntity<?> list() {
         return ResponseEntity.ok(transportService.getAllActive());
+    }
+
+    // NEW: The Search Endpoint for the Frontend!
+    @GetMapping("/search")
+    public ResponseEntity<?> search(@RequestParam String city) {
+        return ResponseEntity.ok(transportService.searchTransports(city));
     }
 
     @GetMapping("/{id}")
@@ -49,8 +54,6 @@ public class TransportServiceController {
         return ResponseEntity.noContent().build();
     }
 
-    //  Utility Endpoints
-
     @GetMapping("/me")
     public ResponseEntity<?> getMyDetails(Authentication authentication) {
         try {
@@ -60,11 +63,7 @@ public class TransportServiceController {
             return ResponseEntity.ok(authentication.getPrincipal());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ApiErrorResponse(
-                            e.getMessage(),
-                            HttpStatus.BAD_REQUEST.value(),
-                            System.currentTimeMillis()
-                    )
+                    new ApiErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value(), System.currentTimeMillis())
             );
         }
     }

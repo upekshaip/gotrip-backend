@@ -14,6 +14,9 @@ public interface TransportRepository extends JpaRepository<Transport, Long> {
     // Find all transports that are NOT removed (for general browsing)
     List<Transport> findByStatusNot(TransportStatus status);
 
+    // For the provider's dashboard to see their own vehicles
+    List<Transport> findByProviderId(Long providerId);
+
     // Find a specific transport by ID but only if it's not removed
     Optional<Transport> findByTransportIdAndStatusNot(Long transportId, TransportStatus status);
 

@@ -2,6 +2,8 @@ package com.gotrip.transport_service.service;
 
 import com.gotrip.common_library.dto.transport_service.TransportBookingRequest;
 import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
+import com.gotrip.transport_service.client.UserServiceClient;
+import com.gotrip.transport_service.dto.TransportBookingResponseDTO;
 import com.gotrip.transport_service.model.Transport;
 import com.gotrip.transport_service.model.TransportBooking;
 import com.gotrip.transport_service.repository.TransportBookingRepository;
@@ -13,8 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,9 @@ public class TransportBookingService {
 
     private final TransportBookingRepository bookingRepository;
     private final TransportRepository transportRepository;
+
+    // Injecting the client to fetch user details from the User Service
+    private final UserServiceClient userServiceClient;
 
     @Transactional
     public TransportBooking createBookingRequest(TransportBookingRequest req, Authentication auth) {
@@ -101,6 +108,66 @@ public class TransportBookingService {
         return bookingRepository.save(booking);
     }
 
+    //  Complete a ride
+    @Transactional
+    public TransportBooking completeBooking(Long bookingId, Authentication auth) {
+        TransportBooking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        // Verify the user responding is the actual Provider of this transport
+        validateProviderOwnership(booking.getTransportId(), auth);
+
+        if (booking.getStatus() != BookingStatus.ACCEPTED) {
+            throw new RuntimeException("Only ACCEPTED bookings can be marked as COMPLETED.");
+        }
+
+        booking.setStatus(BookingStatus.COMPLETED);
+        return bookingRepository.save(booking);
+    }
+
+    //  Data Retrieval with User Details for Frontend ---
+
+    // Fetches all bookings made by the currently logged-in traveler
+    public List<TransportBookingResponseDTO> getMyBookings(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        Map<String, Object> travellerProfile = (Map<String, Object>) principal.get("travellerProfile");
+        Long travellerId = ((Number) travellerProfile.get("travellerId")).longValue();
+
+        List<TransportBooking> bookings = bookingRepository.findByTravellerId(travellerId);
+
+        return bookings.stream().map(booking -> {
+            Transport transport = transportRepository.findById(booking.getTransportId()).orElse(null);
+            Long providerId = (transport != null) ? transport.getProviderId() : null;
+
+            return new TransportBookingResponseDTO(
+                    booking,
+                    userServiceClient.getTravellerContact(travellerId),
+                    providerId != null ? userServiceClient.getProviderContact(providerId) : null
+            );
+        }).collect(Collectors.toList());
+    }
+
+    // Fetches all incoming requests for the vehicles owned by the logged-in provider
+    public List<TransportBookingResponseDTO> getProviderBookings(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        Map<String, Object> providerProfile = (Map<String, Object>) principal.get("serviceProviderProfile");
+        Long providerId = ((Number) providerProfile.get("providerId")).longValue();
+
+        // Get all transports owned by this provider
+        List<Transport> myTransports = transportRepository.findByProviderId(providerId);
+
+        return myTransports.stream().flatMap(transport -> {
+            List<TransportBooking> bookings = bookingRepository.findByTransportId(transport.getTransportId());
+
+            return bookings.stream().map(booking -> new TransportBookingResponseDTO(
+                    booking,
+                    userServiceClient.getTravellerContact(booking.getTravellerId()),
+                    userServiceClient.getProviderContact(providerId)
+            ));
+        }).collect(Collectors.toList());
+    }
+
+    // Existing helper method
     private void validateProviderOwnership(Long transportId, Authentication auth) {
         Transport transport = transportRepository.findById(transportId).orElseThrow();
         Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();

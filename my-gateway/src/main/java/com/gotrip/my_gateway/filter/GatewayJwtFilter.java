@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import org.springframework.web.cors.reactive.CorsUtils;
+
 @Component
 public class GatewayJwtFilter implements GlobalFilter, Ordered {
 
@@ -46,16 +48,18 @@ public class GatewayJwtFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String path = exchange.getRequest().getURI().getPath();
-        String method = exchange.getRequest().getMethod().name();
+        ServerHttpRequest request = exchange.getRequest();
+        String path = request.getURI().getPath();
+        String method = request.getMethod().name();
 
-        // 1. Skip validation for Auth endpoints (Signup/Login/refresh)
+        // 1. Skip validation for Auth endpoints (Signup/Login/refresh) or Preflight (OPTIONS)
         if (
+                CorsUtils.isPreFlightRequest(request) ||
                 (path.equals("/auth/login") && method.equals("POST")) ||
                 (path.equals("/auth/signup") && method.equals("POST")) ||
                 (path.equals("/auth/refresh") && method.equals("GET"))
         ) {
-            System.out.println("Bypassing security for public route: " + method + " " + path);
+            System.out.println("Bypassing security for public route or CORS Preflight: " + method + " " + path);
             return chain.filter(exchange);
         }
 

@@ -12,11 +12,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.ObjectMapper;
 
+
+
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/transport-service")
-@CrossOrigin(origins = "http://localhost:3000")
+
 public class TransportServiceController {
 
     private final ObjectMapper objectMapper;
@@ -75,8 +78,16 @@ public class TransportServiceController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int limit
     ) {
+        return ResponseEntity.ok(transportService.searchTransports(city, page, limit));
+    }
 
-        return ResponseEntity.ok(transportService.searchTransports(city));
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyTransports(
+            @RequestParam(required = false) com.gotrip.common_library.dto.transport_service.enums.TransportStatus status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            Authentication auth) {
+        return ResponseEntity.ok(transportService.getMyAll(status, page, limit, auth));
     }
 
     @GetMapping("/admin/all")
@@ -109,6 +120,16 @@ public class TransportServiceController {
     public ResponseEntity<?> delete(@PathVariable Long id, Authentication auth) {
         transportService.delete(id, auth);
         return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/admin/{id}/approve")
+    public ResponseEntity<?> approveTransport(@PathVariable Long id, Authentication authentication) {
+        try {
+            return ResponseEntity.ok(transportService.approveTransport(id, authentication));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ApiErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value(), System.currentTimeMillis())
+            );
+        }
     }
 
     @GetMapping("/me")

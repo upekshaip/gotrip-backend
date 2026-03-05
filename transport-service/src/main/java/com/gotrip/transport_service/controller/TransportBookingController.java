@@ -1,7 +1,7 @@
 package com.gotrip.transport_service.controller;
 
 import com.gotrip.common_library.dto.transport_service.TransportBookingRequest;
-import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus; // Reusing hotel enum!
+import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
 import com.gotrip.transport_service.service.TransportBookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/transport-bookings")
+@RequestMapping("/transport-service/bookings")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class TransportBookingController {
 
     private final TransportBookingService bookingService;

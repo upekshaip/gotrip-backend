@@ -52,6 +52,10 @@ public class GatewayConfig {
                 .route("transport_service_route", r -> r.path("/transport-service/**")
                         .uri("lb://transport-service"))
           
+                .route("transport_booking_route", r -> r.path("/transport-bookings/**")
+                        .uri("lb://transport-service"))
+                .route("transport_review_route", r -> r.path("/transport-reviews/**")
+                        .uri("lb://transport-service"))
                 .route("hotel_booking_route", r -> r.path("/hotel-booking/**")
                         .uri("lb://hotel-service"))
 

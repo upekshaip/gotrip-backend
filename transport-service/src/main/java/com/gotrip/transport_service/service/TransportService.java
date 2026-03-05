@@ -46,15 +46,26 @@ public class TransportService {
     }
 
     public Page<Transport> searchTransports(String city, int page, int limit) {
-        // Simple un-paginated for now since repository method isn't paginated yet
-        // A better approach would be to add findByCityIgnoreCaseAndStatus to TransportRepository with Pageable
-        // But for time's sake, we'll keep it as List unless requested
-        return null; // Will fix the signature in controller or repository later if needed. For now keeping original logic for search
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
+        return transportRepository.findByCityIgnoreCaseAndStatus(city, TransportStatus.ACTIVE, pageable);
     }
 
     public List<Transport> searchTransports(String city) {
         return transportRepository.findByCityIgnoreCaseAndStatus(city,
                 com.gotrip.common_library.dto.transport_service.enums.TransportStatus.ACTIVE);
+    }
+
+    public Page<Transport> getMyAll(TransportStatus status, int page, int limit, Authentication auth) {
+        Long providerId = extractProviderId(auth);
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
+
+        if (status != null) {
+            return transportRepository.findByProviderIdAndStatusAndStatusNot(
+                    providerId, status, TransportStatus.REMOVED, pageable);
+        }
+
+        return transportRepository.findByProviderIdAndStatusNot(
+                providerId, TransportStatus.REMOVED, pageable);
     }
 
     public Page<Transport> getAllTransportsByAdmin(Authentication authentication, int page, int limit) {
@@ -88,6 +99,14 @@ public class TransportService {
 
         // Hard Delete all associated reviews
         reviewRepository.deleteAllByTransport_TransportId(id);
+    }
+
+    @Transactional
+    public Transport approveTransport(Long id, Authentication authentication) {
+        verifyAdmin(authentication);
+        Transport transport = getById(id);
+        transport.setStatus(TransportStatus.ACTIVE);
+        return transportRepository.save(transport);
     }
 
     public long countAll() {
@@ -129,8 +148,6 @@ public class TransportService {
         transport.setPriceUnit(req.priceUnit());
         transport.setPrice(req.price());
         transport.setCapacity(req.capacity());
-        transport.setLatitude(req.latitude());
-        transport.setLongitude(req.longitude());
         transport.setImageUrl(req.imageUrl());
         transport.setFeatured(req.isFeatured());
     }

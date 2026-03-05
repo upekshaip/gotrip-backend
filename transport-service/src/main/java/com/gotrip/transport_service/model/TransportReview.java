@@ -17,6 +17,7 @@ public class TransportReview {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transport_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Transport transport;
 
     private Long travellerId;

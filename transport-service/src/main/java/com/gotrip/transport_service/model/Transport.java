@@ -79,5 +79,6 @@ public class Transport {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "transport", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<TransportReview> reviews;
 }

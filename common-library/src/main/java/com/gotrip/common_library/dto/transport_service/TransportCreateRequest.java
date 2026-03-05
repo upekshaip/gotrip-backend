@@ -15,8 +15,8 @@ public record TransportCreateRequest(
         @NotNull(message = "Price unit is required") PriceUnit priceUnit,
         @NotNull(message = "Price is required") BigDecimal price,
         @NotNull(message = "Capacity is required") @Min(1) Integer capacity,
-        @NotNull(message = "Latitude is required") Double latitude,
-        @NotNull(message = "Longitude is required") Double longitude,
+        Double latitude,
+        Double longitude,
         String imageUrl,
         boolean isFeatured
 ) {}

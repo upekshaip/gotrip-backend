@@ -42,6 +42,11 @@ public class TransportService {
                 .orElseThrow(() -> new RuntimeException("Transport vehicle not found or has been removed."));
     }
 
+    public List<Transport> searchTransports(String city) {
+        return transportRepository.findByCityIgnoreCaseAndStatus(city,
+                com.gotrip.common_library.dto.transport_service.enums.TransportStatus.ACTIVE);
+    }
+
     @Transactional
     public Transport update(Long id, TransportCreateRequest request, Authentication auth) {
         Transport transport = getById(id);

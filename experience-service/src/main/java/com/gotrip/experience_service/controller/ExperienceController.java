@@ -1,6 +1,7 @@
 package com.gotrip.experience_service.controller;
 
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
+import com.gotrip.common_library.dto.hotel_service.HotelCreateRequest;
 import com.gotrip.experience_service.dto.*;
 import com.gotrip.experience_service.service.ExperienceService;
 import com.gotrip.experience_service.service.BookingService;
@@ -62,16 +63,27 @@ public class ExperienceController {
     public ResponseEntity<?> updateExperience(
             Authentication authentication,
             @PathVariable Long id,
-            @RequestBody UpdateExperienceRequest request) {
-        try {
+            @RequestBody UpdateExperienceRequest request)
+    {
             Long providerId = extractProviderId(authentication);
             ExperienceResponseDTO response = experienceService.updateExperience(id, request, providerId);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ApiErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value(), System.currentTimeMillis())
-            );
-        }
+    }
+
+    @PutMapping("admin/{id}")
+    public ResponseEntity<?> updateByAdmin(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateExperienceRequest req,
+            Authentication auth) {
+        return ResponseEntity.ok(experienceService.updateByAdmin(id, req, auth));
+    }
+
+    @PutMapping("admin/avaible/{id}")
+    public ResponseEntity<?> updateAvailableByAdmin(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateExperienceRequest req,
+            Authentication auth) {
+        return ResponseEntity.ok(experienceService.updateAvailableByAdmin(id, req, auth));
     }
 
     @DeleteMapping("/delete/{id}")
@@ -99,6 +111,15 @@ public class ExperienceController {
     @GetMapping("/all")
     public ResponseEntity<?> getAllExperiences() {
         return ResponseEntity.ok(experienceService.getAllExperiences());
+    }
+
+    @GetMapping("/admin/all")
+    public ResponseEntity<?> getAllExperiencesByAdmin(
+            Authentication authentication,
+            @RequestParam(defaultValue = "all") String filter,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(experienceService.getAllExperiencesByAdmin(authentication, page, limit, filter));
     }
 
     @GetMapping("/available")

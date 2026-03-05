@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -64,6 +65,37 @@ public class ExperienceService {
         return mapToResponse(saved);
     }
 
+
+    public ExperienceResponseDTO updateByAdmin(Long experienceId, UpdateExperienceRequest request, Authentication auth) {
+        extractAdminId(auth);
+
+        Experience experience = experienceRepository.findById(experienceId)
+                .orElseThrow(() -> new RuntimeException("Experience not found"));
+
+        if (request.title() != null) experience.setTitle(request.title());
+        if (request.description() != null) experience.setDescription(request.description());
+        if (request.category() != null) experience.setCategory(request.category());
+        if (request.type() != null) experience.setType(request.type());
+        if (request.location() != null) experience.setLocation(request.location());
+        if (request.pricePerUnit() != null) experience.setPricePerUnit(request.pricePerUnit());
+        if (request.priceUnit() != null) experience.setPriceUnit(request.priceUnit());
+        if (request.maxCapacity() != null) experience.setMaxCapacity(request.maxCapacity());
+        if (request.imageUrl() != null) experience.setImageUrl(request.imageUrl());
+        if (request.available() != null) experience.setAvailable(request.available());
+        Experience saved = experienceRepository.save(experience);
+        return mapToResponse(saved);
+    }
+
+    public ExperienceResponseDTO updateAvailableByAdmin(Long experienceId, UpdateExperienceRequest request, Authentication auth) {
+        extractAdminId(auth);
+
+        Experience experience = experienceRepository.findById(experienceId)
+                .orElseThrow(() -> new RuntimeException("Experience not found"));
+        experience.setAvailable(request.available());
+        Experience saved = experienceRepository.save(experience);
+        return mapToResponse(saved);
+    }
+
     public void deleteExperience(Long experienceId, Long providerId) {
         Experience experience = experienceRepository.findById(experienceId)
                 .orElseThrow(() -> new RuntimeException("Experience not found"));
@@ -95,6 +127,28 @@ public class ExperienceService {
     public long countAvailable() {
         return experienceRepository.countByAvailableTrue();
     }
+
+    public Page<Experience> getAllExperiencesByAdmin(Authentication auth, int page, int limit, String filter) {
+        extractAdminId(auth); // Ensure admin is authorized
+
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        if (filter == null || filter.equalsIgnoreCase("all")) {
+            return experienceRepository.findAll(pageable);
+        }
+
+        if (filter.equalsIgnoreCase("available")) {
+            return experienceRepository.findByAvailable(true, pageable);
+        }
+
+        if (filter.equalsIgnoreCase("unavailable")) {
+            return experienceRepository.findByAvailable(false, pageable);
+        }
+
+        // Default fallback
+        return experienceRepository.findAll(pageable);
+    }
+
 
     public Page<ExperienceResponseDTO> getAvailableExperiences(int page, int limit) {
         // We create the PageRequest here
@@ -146,5 +200,13 @@ public class ExperienceService {
                 experience.getCreatedAt(),
                 experience.getUpdatedAt()
         );
+    }
+    private Long extractAdminId(Authentication auth) {
+        Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
+        if (!(boolean) principal.getOrDefault("admin", false)) {
+            throw new RuntimeException("Unauthorized: Only admins can manage listings.");
+        }
+        Map<String, Object> profile = (Map<String, Object>) principal.get("adminProfile");
+        return ((Number) profile.get("adminId")).longValue();
     }
 }

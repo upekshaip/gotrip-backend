@@ -1,18 +1,26 @@
 package com.gotrip.experience_service.service;
 
+import com.gotrip.common_library.dto.user.TravellerContactInfo;
+import com.gotrip.experience_service.client.UserServiceClient;
 import com.gotrip.experience_service.dto.*;
 import com.gotrip.experience_service.model.Experience;
 import com.gotrip.experience_service.repository.ExperienceRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class ExperienceService {
 
     private final ExperienceRepository experienceRepository;
+    private final UserServiceClient userServiceClient;
 
     public ExperienceResponseDTO createExperience(CreateExperienceRequest request, Long providerId) {
         Experience experience = Experience.builder()
@@ -67,10 +75,11 @@ public class ExperienceService {
         experienceRepository.delete(experience);
     }
 
-    public ExperienceResponseDTO getExperienceById(Long experienceId) {
+    public Map<String, Object> getExperienceById(Long experienceId) {
         Experience experience = experienceRepository.findById(experienceId)
                 .orElseThrow(() -> new RuntimeException("Experience not found"));
-        return mapToResponse(experience);
+        TravellerContactInfo contact = userServiceClient.getProviderContact(experience.getProviderId());
+        return Map.of("experience", experience, "contact", contact);
     }
 
     public List<ExperienceResponseDTO> getAllExperiences() {
@@ -79,10 +88,14 @@ public class ExperienceService {
                 .toList();
     }
 
-    public List<ExperienceResponseDTO> getAvailableExperiences() {
-        return experienceRepository.findByAvailableTrue().stream()
-                .map(this::mapToResponse)
-                .toList();
+    public Page<ExperienceResponseDTO> getAvailableExperiences(int page, int limit) {
+        // We create the PageRequest here
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Experience> experiencePage = experienceRepository.findByAvailableTrue(pageable);
+
+        // .map() on a Page object keeps all the "extra" info (totalPages, first, last, etc.)
+        return experiencePage.map(this::mapToResponse);
     }
 
     public List<ExperienceResponseDTO> getExperiencesByCategory(String category) {
@@ -97,10 +110,15 @@ public class ExperienceService {
                 .toList();
     }
 
-    public List<ExperienceResponseDTO> getExperiencesByProvider(Long providerId) {
-        return experienceRepository.findByProviderId(providerId).stream()
-                .map(this::mapToResponse)
-                .toList();
+    public Page<ExperienceResponseDTO> getExperiencesByProvider(Long providerId, int page, int limit) {
+        // page - 1 because Spring Data is 0-indexed internally
+        Pageable pageable = PageRequest.of(page - 1, limit,
+                Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Experience> experiencePage = experienceRepository.findByProviderId(providerId, pageable);
+
+        // .map() on a Page object preserves all the pagination metadata you want
+        return experiencePage.map(this::mapToResponse);
     }
 
     private ExperienceResponseDTO mapToResponse(Experience experience) {

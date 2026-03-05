@@ -63,6 +63,7 @@ public class BookingService {
 
         ExperienceBooking booking = ExperienceBooking.builder()
                 .experience(experience)
+                .requestMessage(request.requestMessage())
                 .travellerId(travellerId)
                 .providerId(experience.getProviderId())
                 .bookingDate(request.bookingDate())

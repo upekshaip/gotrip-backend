@@ -26,6 +26,9 @@ public class TransportBooking {
     @Column(nullable = false)
     private Long travellerId;
 
+    @Column(nullable = false)
+    private Long providerId;
+
     @Column(unique = true, nullable = false)
     private String bookingReference;
 

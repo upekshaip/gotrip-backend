@@ -15,7 +15,9 @@ public class TransportReview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewId;
 
-    private Long transportId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "transport_id", nullable = false)
+    private Transport transport;
 
     private Long travellerId;
 

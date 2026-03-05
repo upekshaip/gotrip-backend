@@ -9,16 +9,18 @@ import com.gotrip.transport_service.model.TransportBooking;
 import com.gotrip.transport_service.repository.TransportBookingRepository;
 import com.gotrip.transport_service.repository.TransportRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +60,7 @@ public class TransportBookingService {
         booking.setEndingDate(req.endingDate());
         booking.setEndingTime(req.endingTime());
         booking.setRequestMessage(req.requestMessage());
+        booking.setProviderId(transport.getProviderId()); // Set providerId explicitly!
 
         // Price calculation
         long days = ChronoUnit.DAYS.between(req.startingDate(), req.endingDate());
@@ -128,14 +131,20 @@ public class TransportBookingService {
     //  Data Retrieval with User Details for Frontend ---
 
     // Fetches all bookings made by the currently logged-in traveler
-    public List<TransportBookingResponseDTO> getMyBookings(Authentication auth) {
+    public Page<TransportBookingResponseDTO> getMyBookings(BookingStatus status, int page, int limit, Authentication auth) {
         Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
         Map<String, Object> travellerProfile = (Map<String, Object>) principal.get("travellerProfile");
+        
+        if (travellerProfile == null) throw new RuntimeException("Traveller profile not found");
         Long travellerId = ((Number) travellerProfile.get("travellerId")).longValue();
 
-        List<TransportBooking> bookings = bookingRepository.findByTravellerId(travellerId);
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
 
-        return bookings.stream().map(booking -> {
+        Page<TransportBooking> bookings = (status != null)
+                ? bookingRepository.findByTravellerIdAndStatus(travellerId, status, pageable)
+                : bookingRepository.findByTravellerId(travellerId, pageable);
+
+        return bookings.map(booking -> {
             Transport transport = transportRepository.findById(booking.getTransportId()).orElse(null);
             Long providerId = (transport != null) ? transport.getProviderId() : null;
 
@@ -144,27 +153,28 @@ public class TransportBookingService {
                     userServiceClient.getTravellerContact(travellerId),
                     providerId != null ? userServiceClient.getProviderContact(providerId) : null
             );
-        }).collect(Collectors.toList());
+        });
     }
 
     // Fetches all incoming requests for the vehicles owned by the logged-in provider
-    public List<TransportBookingResponseDTO> getProviderBookings(Authentication auth) {
+    public Page<TransportBookingResponseDTO> getProviderBookings(BookingStatus status, int page, int limit, Authentication auth) {
         Map<String, Object> principal = (Map<String, Object>) auth.getPrincipal();
         Map<String, Object> providerProfile = (Map<String, Object>) principal.get("serviceProviderProfile");
+        
+        if (providerProfile == null) throw new RuntimeException("Service Provider profile not found");
         Long providerId = ((Number) providerProfile.get("providerId")).longValue();
+        
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
 
-        // Get all transports owned by this provider
-        List<Transport> myTransports = transportRepository.findByProviderId(providerId);
+        Page<TransportBooking> bookings = (status != null)
+                ? bookingRepository.findByProviderIdAndStatus(providerId, status, pageable)
+                : bookingRepository.findByProviderId(providerId, pageable);
 
-        return myTransports.stream().flatMap(transport -> {
-            List<TransportBooking> bookings = bookingRepository.findByTransportId(transport.getTransportId());
-
-            return bookings.stream().map(booking -> new TransportBookingResponseDTO(
-                    booking,
-                    userServiceClient.getTravellerContact(booking.getTravellerId()),
-                    userServiceClient.getProviderContact(providerId)
-            ));
-        }).collect(Collectors.toList());
+        return bookings.map(booking -> new TransportBookingResponseDTO(
+                booking,
+                userServiceClient.getTravellerContact(booking.getTravellerId()),
+                userServiceClient.getProviderContact(providerId)
+        ));
     }
 
     public long countAll() {

@@ -3,6 +3,7 @@ package com.gotrip.experience_service.controller;
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.experience_service.dto.*;
 import com.gotrip.experience_service.service.ExperienceService;
+import com.gotrip.experience_service.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,27 @@ import java.util.Map;
 public class ExperienceController {
 
     private final ExperienceService experienceService;
+    private final BookingService bookingService;
+
+    @GetMapping("/admin/stats")
+    public ResponseEntity<?> getAdminStats(Authentication authentication) {
+        Map<String, Object> principal = (Map<String, Object>) authentication.getPrincipal();
+        if (!(boolean) principal.getOrDefault("admin", false)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    new ApiErrorResponse("Unauthorized: Only admins can access stats.", HttpStatus.FORBIDDEN.value(), System.currentTimeMillis())
+            );
+        }
+        long totalExperiences = experienceService.countAll();
+        long availableExperiences = experienceService.countAvailable();
+        long totalBookings = bookingService.countAll();
+        long pendingBookings = bookingService.countPending();
+        return ResponseEntity.ok(Map.of(
+                "totalExperiences", totalExperiences,
+                "availableExperiences", availableExperiences,
+                "totalBookings", totalBookings,
+                "pendingBookings", pendingBookings
+        ));
+    }
 
     @PostMapping("/create")
     public ResponseEntity<?> createExperience(

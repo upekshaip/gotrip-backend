@@ -28,4 +28,6 @@ public interface TransportRepository extends JpaRepository<Transport, Long> {
 
     // Find featured transports that are active
     List<Transport> findByIsFeaturedTrueAndStatus(TransportStatus status);
+
+    long countByStatus(TransportStatus status);
 }

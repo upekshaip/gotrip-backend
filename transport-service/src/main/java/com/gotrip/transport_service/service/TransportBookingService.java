@@ -167,6 +167,14 @@ public class TransportBookingService {
         }).collect(Collectors.toList());
     }
 
+    public long countAll() {
+        return bookingRepository.count();
+    }
+
+    public long countPending() {
+        return bookingRepository.countByStatus(BookingStatus.PENDING);
+    }
+
     // Existing helper method
     private void validateProviderOwnership(Long transportId, Authentication auth) {
         Transport transport = transportRepository.findById(transportId).orElseThrow();

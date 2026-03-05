@@ -23,6 +23,8 @@ public interface ExperienceRepository extends JpaRepository<Experience, Long> {
     // In ExperienceRepository.java
     Page<Experience> findByAvailableTrue(Pageable pageable);
 
+    long countByAvailableTrue();
+
     List<Experience> findByCategoryAndAvailableTrue(String category);
 
     List<Experience> findByLocationAndAvailableTrue(String location);

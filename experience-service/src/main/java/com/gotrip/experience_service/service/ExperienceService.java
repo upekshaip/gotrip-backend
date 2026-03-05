@@ -88,6 +88,14 @@ public class ExperienceService {
                 .toList();
     }
 
+    public long countAll() {
+        return experienceRepository.count();
+    }
+
+    public long countAvailable() {
+        return experienceRepository.countByAvailableTrue();
+    }
+
     public Page<ExperienceResponseDTO> getAvailableExperiences(int page, int limit) {
         // We create the PageRequest here
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "createdAt"));

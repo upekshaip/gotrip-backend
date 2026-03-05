@@ -2,6 +2,8 @@ package com.gotrip.user_service.controller.user;
 
 
 import com.gotrip.common_library.config.AppConfig;
+import com.gotrip.common_library.dto.admin.ChangeRolesRequest;
+import com.gotrip.common_library.dto.admin.EditUserRequest;
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.common_library.dto.user.UserProfileUpdateRequest;
 import com.gotrip.user_service.model.User;
@@ -10,6 +12,7 @@ import com.gotrip.user_service.service.SignupService;
 import com.gotrip.user_service.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -68,6 +71,41 @@ public class UserController {
         }
     }
 
+    @GetMapping("/admin/all-travellers")
+    public ResponseEntity<Page<User>> getAllTravellers(
+            Authentication authentication,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+            return ResponseEntity.ok(userService.getAllTravellers(authentication, page, limit));
+    }
+
+    @GetMapping("/admin/all-providers")
+    public ResponseEntity<Page<User>> getAllProviders(
+            Authentication authentication,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+            return ResponseEntity.ok(userService.getAllProviders(authentication, page, limit));
+    }
+
+    @PatchMapping("/admin/edit-user")
+    public ResponseEntity<User> editUser(
+            Authentication authentication,
+            @RequestBody EditUserRequest editUserReq
+    ) {
+            return ResponseEntity.ok(userService.editUser(authentication, editUserReq));
+    }
+
+    @PatchMapping("/admin/edit-user-role")
+    public ResponseEntity<User> editUserRole(
+            Authentication authentication,
+            @RequestBody ChangeRolesRequest changeRolesReq
+    ) {
+            return ResponseEntity.ok(userService.changeRoles(authentication, changeRolesReq));
+    }
+
+
     @PatchMapping("/update-profile")
     public ResponseEntity<?> updateProfile(
             Authentication authentication,
@@ -114,5 +152,18 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    // External call to get traveller contact info
+    @GetMapping("/admin/traveller/{travellerId}")
+    public ResponseEntity<?> getOutsideTravellerInfo(@PathVariable Long travellerId) {
+            // signupService should have a method to find User by travellerId
+            return ResponseEntity.ok(userService.getTravellerContact(travellerId));
+    }
+
+    // External call to get provider contact info
+    @GetMapping("/admin/provider/{providerId}")
+    public ResponseEntity<?> getOutsideProviderInfo(@PathVariable Long providerId) {
+            return ResponseEntity.ok(userService.getProviderContact(providerId));
     }
 }

@@ -4,6 +4,7 @@ package com.gotrip.user_service.controller.user;
 import com.gotrip.common_library.config.AppConfig;
 import com.gotrip.common_library.dto.admin.ChangeRolesRequest;
 import com.gotrip.common_library.dto.admin.EditUserRequest;
+import com.gotrip.common_library.dto.auth.CreateServiceAccountRequest;
 import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.common_library.dto.user.UserProfileUpdateRequest;
 import com.gotrip.user_service.model.User;
@@ -53,6 +54,17 @@ public class UserController {
 
             );
         }
+    }
+
+    @PostMapping("/create-service-account")
+    public ResponseEntity<?> createServiceAccount(Authentication authentication,
+                                                  @RequestBody CreateServiceAccountRequest createServiceAccountRequest) {
+            return ResponseEntity.ok(userService.createServiceAccount(authentication, createServiceAccountRequest));
+    }
+
+    @GetMapping("/check-me")
+    public ResponseEntity<?> checkMe(Authentication authentication) {
+            return ResponseEntity.ok(userService.getMe(authentication));
     }
 
     @GetMapping("/profile")

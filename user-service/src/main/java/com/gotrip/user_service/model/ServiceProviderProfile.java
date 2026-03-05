@@ -30,13 +30,13 @@ public class ServiceProviderProfile {
     @JsonBackReference
     private User user;
 
-    @Column(length = 100)
+    @Column(length = 255)
     private String businessName;
 
     @Column(length = 255)
     private String businessAddress;
 
-    @Column(length = 50)
+    @Column(length = 255)
     private String businessType;
 
     @Column(length = 20)

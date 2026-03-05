@@ -3,6 +3,7 @@ package com.gotrip.user_service.service;
 import com.gotrip.common_library.dto.admin.ChangeRolesRequest;
 import com.gotrip.common_library.dto.admin.EditUserRequest;
 import com.gotrip.common_library.dto.admin.enums.UserRoles;
+import com.gotrip.common_library.dto.auth.CreateServiceAccountRequest;
 import com.gotrip.common_library.service.JWTService;
 import com.gotrip.user_service.model.AdminProfile;
 import com.gotrip.user_service.model.ServiceProviderProfile;
@@ -68,6 +69,47 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    public User createServiceAccount(Authentication authentication, CreateServiceAccountRequest accInfo) {
+        Long travellerId = extractTravellerId(authentication);
+        System.out.println(accInfo);
+        User user = userRepository.findByTravellerProfile_TravellerId(travellerId)
+                .orElseThrow(() -> new RuntimeException("User not found with travellerId: " + travellerId));
+
+        // 1. Check if already a Service Provider
+        if (user.getServiceProviderProfile() != null) {
+            throw new RuntimeException("You are already registered as a service provider.");
+        }
+
+        // 2. Check if already an Admin (Admins usually shouldn't downgrade/overlap unless business rules allow)
+        if (user.getAdminProfile() != null) {
+            throw new RuntimeException("Admins cannot create service provider accounts.");
+        }
+
+        // 3. Create the Service Provider Profile
+        ServiceProviderProfile profile = new ServiceProviderProfile();
+        profile.setBusinessName(accInfo.businessName());
+        profile.setBusinessAddress(accInfo.businessAddress());
+        profile.setBusinessPhone(accInfo.businessPhone());
+        profile.setBusinessType(accInfo.businessType());
+
+        // Set the relationship
+        profile.setUser(user);
+        user.setServiceProviderProfile(profile);
+        user.setServiceProvider(true); // Assuming you have a boolean flag for roles
+
+        return userRepository.save(user);
+    }
+    public User getMe(Authentication authentication) {
+        Long travellerId = extractTravellerId(authentication);
+        User user = userRepository.findByTravellerProfile_TravellerId(travellerId)
+                .orElseThrow(() -> new RuntimeException("User not found with travellerId: " + travellerId));
+        return user;
+    }
+
+
+
+
 
     public User changeRoles(Authentication authentication, ChangeRolesRequest changeRolesReq) {
         extractAdminId(authentication);

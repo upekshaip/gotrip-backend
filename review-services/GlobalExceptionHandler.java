@@ -30,6 +30,7 @@ public class GlobalExceptionHandler {
         body.put("message", "Invalid input: " + ex.getMessage());
         body.put("status", HttpStatus.BAD_REQUEST.value());
         System.out.println("shakeef");
+        System.out.println("shakeef");
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 }

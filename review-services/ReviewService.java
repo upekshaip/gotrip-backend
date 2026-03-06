@@ -20,5 +20,7 @@ public Map<String, Object> getReviewAnalytics(Long transportId) {
     stats.put("totalReviews", reviews.size());
     stats.put("positiveFeedbackPercentage", (reviews.isEmpty()) ? 0 : (highRatings * 100 / reviews.size()));
     System.out.println("shakeef");
+    System.out.println("shakeef");
+    System.out.println("shakeef");
     return stats;
 }

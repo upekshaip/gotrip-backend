@@ -18,12 +18,12 @@ import java.util.Map;
 public class TransportServiceController {
 
     private final ObjectMapper objectMapper;
-    private final TransportService transportService;
+//    private final TransportService transportService;
     private final TransportBookingService transportBookingService;
 
     public TransportServiceController(TransportService transportService, TransportBookingService transportBookingService, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.transportService = transportService;
+//        this.transportService = transportService;
         this.transportBookingService = transportBookingService;
     }
 

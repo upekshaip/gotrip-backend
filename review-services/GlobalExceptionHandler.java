@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
         body.put("message", ex.getMessage());
         body.put("status", HttpStatus.NOT_FOUND.value());
-
+        System.out.println("shakeef");
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 

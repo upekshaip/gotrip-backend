@@ -17,7 +17,7 @@ public Map<String, Object> getReviewAnalytics(Long transportId) {
     Map<String, Object> stats = new LinkedHashMap<>();
     stats.put("transportId", transportId);
     stats.put("average", Math.round(average * 100.0) / 100.0);
-    stats.put("totalReviews", reviews.size());
+    stats.put("Reviews", reviews.size());
     stats.put("positiveFeedbackPercentage", (reviews.isEmpty()) ? 0 : (highRatings * 100 / reviews.size()));
 
     return stats;

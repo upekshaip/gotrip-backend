@@ -4,6 +4,6 @@ import com.gotrip.common_library.dto.user.TravellerContactInfo;
 
 public record RestaurantBookingResponse(
         RestaurantBookingDTO booking,
-        RestaurantSummaryResponse restaurantDetails,
+        RestaurantSummaryResponse restaurantDetails, // Includes name, city, image
         TravellerContactInfo travellerInfo // Only included for Provider view
 ) {}

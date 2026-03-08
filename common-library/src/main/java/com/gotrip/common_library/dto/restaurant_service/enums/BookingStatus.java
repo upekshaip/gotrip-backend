@@ -1,4 +1,4 @@
-package com.gotrip.common_library.dto.hotel_service.enums;
+package com.gotrip.common_library.dto.restaurant_service.enums;
 
 public enum BookingStatus {
     PENDING,

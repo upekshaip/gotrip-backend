@@ -1,6 +1,6 @@
 package com.gotrip.common_library.dto.restaurant_service;
 
-import com.gotrip.common_library.dto.hotel_service.enums.PriceUnit;
+import com.gotrip.common_library.dto.restaurant_service.enums.PriceUnit;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -17,8 +17,6 @@ public record RestaurantCreateRequest(
 
         @NotBlank(message = "City is required")
         String city,
-
-        String cuisineType,
 
         @NotNull(message = "Base price is required")
         @Positive(message = "Price must be greater than zero")

@@ -1,6 +1,7 @@
 package com.gotrip.restaurant_service.controller;
 
 
+import com.gotrip.common_library.dto.error.ApiErrorResponse;
 import com.gotrip.common_library.dto.restaurant_service.RestaurantCreateRequest;
 import com.gotrip.common_library.dto.restaurant_service.RestaurantSummaryResponse;
 import com.gotrip.common_library.dto.restaurant_service.UpdateStatusRequest;
@@ -62,6 +63,7 @@ public class RestaurantServiceController {
         return ResponseEntity.ok(restaurantService.getByIdForTraveller(id));
     }
 
+
     @GetMapping("/provider/{id}")
     public ResponseEntity<?> getByProvider(@PathVariable Long id, @Valid @RequestBody RestaurantCreateRequest req, Authentication auth) {
         return ResponseEntity.ok(restaurantService.getByIdForProvider(id, auth));
@@ -91,6 +93,7 @@ public class RestaurantServiceController {
     public ResponseEntity<?> getMyDetails(Authentication authentication) {
         System.out.println("request coming...");
         return ResponseEntity.ok(authentication.getPrincipal());
+
     }
 
     @GetMapping("admin/all")
@@ -108,5 +111,6 @@ public class RestaurantServiceController {
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(restaurantService.getPendingRestaurantsByAdmin(authentication, page, limit));
     }
+
 
 }

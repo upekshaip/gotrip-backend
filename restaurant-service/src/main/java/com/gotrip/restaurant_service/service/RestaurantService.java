@@ -9,6 +9,7 @@ import com.gotrip.restaurant_service.client.UserServiceClient;
 import com.gotrip.restaurant_service.model.Restaurant;
 import com.gotrip.restaurant_service.repository.RestaurantRepository;
 import com.gotrip.restaurant_service.repository.RestaurantReviewRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +19,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -40,18 +43,35 @@ public class RestaurantService {
     }
 
     public Page<RestaurantSummaryResponse> getAllActive(int page, int limit) {
+        // 0-indexed page for Spring Data, sorting by featured first, then newest
         Pageable pageable = PageRequest.of(page - 1, limit,
                 Sort.by(Sort.Direction.DESC, "isFeatured")
                         .and(Sort.by(Sort.Direction.DESC, "updatedAt")));
 
         Page<Restaurant> restaurantPage = restaurantRepository.findByStatus(RestaurantStatus.ACTIVE, pageable);
 
-        return restaurantPage.map(this::mapToSummaryResponse);
+        // Map the Entity to our Response DTO
+        return restaurantPage.map(h -> new RestaurantSummaryResponse(
+                h.getRestaurantId(),
+                h.getName(),
+                h.getDescription(),
+                h.getAddress(),
+                h.getCity(),
+                h.getImageUrl(),
+                h.getPriceUnit(),
+                h.getPrice(),
+                h.getDiscount(),
+                h.isFeatured(),
+                h.getStatus(),
+                h.getProviderId(),
+                h.getUpdatedAt()
+        ));
     }
 
     public Page<Restaurant> getMyAll(RestaurantStatus status, int page, int limit, Authentication auth) {
         Long providerId = extractProviderId(auth);
 
+        // PageRequest.of returns the correct org.springframework.data.domain.Pageable
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("updatedAt").descending());
 
         if (status != null) {
@@ -63,28 +83,31 @@ public class RestaurantService {
                 providerId, RestaurantStatus.REMOVED, pageable);
     }
 
+
+
     public Restaurant getById(Long id) {
         return restaurantRepository.findById(id)
-                .filter(r -> r.getStatus() != RestaurantStatus.REMOVED)
+                .filter(h -> h.getStatus() != RestaurantStatus.REMOVED)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found or has been removed."));
     }
 
     public Map<String, Object> getByIdForTraveller(Long id) {
-        Restaurant restaurant = restaurantRepository.findById(id)
-                .filter(r -> r.getStatus() == RestaurantStatus.ACTIVE)
+        Restaurant restaurant =  restaurantRepository.findById(id)
+                .filter(h -> h.getStatus() == RestaurantStatus.ACTIVE)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found or has been removed."));
         TravellerContactInfo contact = userServiceClient.getProviderContact(restaurant.getProviderId());
         return Map.of("restaurant", restaurant, "provider", contact.name());
     }
 
-    public Restaurant getByIdForProvider(Long id, Authentication auth) {
+    public Restaurant getByIdForProvider(Long id,Authentication auth) {
         Restaurant restaurant = getById(id);
         validateOwnership(restaurant, auth);
 
         return restaurantRepository.findById(id)
-                .filter(r -> r.getStatus() != RestaurantStatus.REMOVED)
+                .filter(h -> h.getStatus() != RestaurantStatus.REMOVED)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found or has been removed."));
     }
+
 
     @Transactional
     public Restaurant update(Long id, RestaurantCreateRequest request, Authentication auth) {
@@ -122,15 +145,18 @@ public class RestaurantService {
 
         // Hard Delete all associated reviews
         reviewRepository.deleteAllByRestaurant_RestaurantId(id);
-        return restaurant;
+        return  restaurant;
     }
 
     public Page<Restaurant> getAllRestaurantsByAdmin(Authentication authentication, int page, int limit) {
         extractAdminId(authentication);
+        // 0-indexed PageRequest, sorting by newest updated
         Pageable pageable = PageRequest.of(page - 1, limit,
                 Sort.by(Sort.Direction.DESC, "updatedAt"));
 
-        return restaurantRepository.findAll(pageable);
+        Page<Restaurant> restaurantPage = restaurantRepository.findAll(pageable);
+
+        return restaurantPage;
     }
 
     public Page<Restaurant> getPendingRestaurantsByAdmin(Authentication authentication, int page, int limit) {
@@ -139,26 +165,27 @@ public class RestaurantService {
         Pageable pageable = PageRequest.of(page - 1, limit,
                 Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        return restaurantRepository.findByStatus(RestaurantStatus.PENDING, pageable);
+        // Assuming RestaurantStatus is an Enum or String; adjust based on your model
+        Page<Restaurant> restaurantPage = restaurantRepository.findByStatus(RestaurantStatus.PENDING, pageable);
+        return restaurantPage;
     }
 
-    // Helper mapper
-    private RestaurantSummaryResponse mapToSummaryResponse(Restaurant r) {
+    // Helper mapper (reusing your existing logic)
+    private RestaurantSummaryResponse mapToSummaryResponse(Restaurant h) {
         return new RestaurantSummaryResponse(
-                r.getRestaurantId(),
-                r.getName(),
-                r.getDescription(),
-                r.getAddress(),
-                r.getCity(),
-                r.getCuisineType(),
-                r.getImageUrl(),
-                r.getPriceUnit(),
-                r.getPrice(),
-                r.getDiscount(),
-                r.isFeatured(),
-                r.getStatus(),
-                r.getProviderId(),
-                r.getUpdatedAt()
+                h.getRestaurantId(),
+                h.getName(),
+                h.getDescription(),
+                h.getAddress(),
+                h.getCity(),
+                h.getImageUrl(),
+                h.getPriceUnit(),
+                h.getPrice(),
+                h.getDiscount(),
+                h.isFeatured(),
+                h.getStatus(),
+                h.getProviderId(),
+                h.getUpdatedAt()
         );
     }
 
@@ -177,12 +204,13 @@ public class RestaurantService {
         return ((Number) profile.get("providerId")).longValue();
     }
 
+
+
     private void mapDtoToEntity(RestaurantCreateRequest req, Restaurant restaurant) {
         restaurant.setName(req.name());
         restaurant.setDescription(req.description());
         restaurant.setAddress(req.address());
         restaurant.setCity(req.city());
-        restaurant.setCuisineType(req.cuisineType());
         restaurant.setPriceUnit(req.priceUnit());
         restaurant.setPrice(req.price());
         restaurant.setLatitude(req.latitude());

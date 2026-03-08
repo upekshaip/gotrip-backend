@@ -1,7 +1,7 @@
 package com.gotrip.restaurant_service.model;
 
-import com.gotrip.common_library.dto.hotel_service.enums.BookingStatus;
-import com.gotrip.common_library.dto.hotel_service.enums.PriceUnit;
+import com.gotrip.common_library.dto.restaurant_service.enums.BookingStatus;
+import com.gotrip.common_library.dto.restaurant_service.enums.PriceUnit;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +34,7 @@ public class RestaurantBooking {
     @Column(unique = true, nullable = false)
     private String bookingReference; // e.g., GT-2026-X89
 
+    //    if approved changed to approve, or rejected, else timeout
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BookingStatus status = BookingStatus.PENDING;
@@ -52,16 +53,25 @@ public class RestaurantBooking {
     private BigDecimal basePrice;
 
     @Column(nullable = false)
+    private int roomCount;
+
+    @Column(nullable = false)
     private String requestMessage;
 
     @Column
     private String providerMessage;
 
     @Column(nullable = false)
-    private LocalDate reservationDate;
+    private LocalDate startingDate;
 
     @Column(nullable = false)
-    private LocalTime reservationTime;
+    private LocalTime startingTime;
+
+    @Column(nullable = false)
+    private LocalDate endingDate;
+
+    @Column(nullable = false)
+    private LocalTime endingTime;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal totalAmount;

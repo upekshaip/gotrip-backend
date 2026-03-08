@@ -1,7 +1,7 @@
 package com.gotrip.restaurant_service.model;
 
-import com.gotrip.common_library.dto.hotel_service.enums.PriceUnit;
 import com.gotrip.common_library.dto.restaurant_service.enums.RestaurantStatus;
+import com.gotrip.common_library.dto.restaurant_service.enums.PriceUnit;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +32,7 @@ public class Restaurant {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RestaurantStatus status = RestaurantStatus.PENDING;
+    private RestaurantStatus status = RestaurantStatus.PENDING; // Use the Enum here
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -43,12 +43,9 @@ public class Restaurant {
     @Column(nullable = false)
     private String city;
 
-    @Column
-    private String cuisineType; // e.g., Italian, Chinese, Sri Lankan, etc.
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PriceUnit priceUnit = PriceUnit.PER_PERSON; // Default for restaurants
+    private PriceUnit priceUnit = PriceUnit.PER_DAY; // Default for restaurants
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
@@ -64,10 +61,10 @@ public class Restaurant {
     private Double longitude;
 
     @Column(nullable = false)
-    private boolean isFeatured = false;
+    private boolean isFeatured = false; // Is the restaurant currently featured?
 
     @Column
-    private String imageUrl;
+    private String imageUrl; // URL to the main thumbnail
 
     // --- Auditing Fields ---
     @CreatedDate
@@ -78,7 +75,7 @@ public class Restaurant {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // Relationship to reviews
+    // Relationship to reviews (Optional, but helpful for fetching)
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RestaurantReview> reviews;
 }

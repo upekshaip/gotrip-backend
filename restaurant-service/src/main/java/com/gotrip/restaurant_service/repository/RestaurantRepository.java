@@ -17,6 +17,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
     // Find all restaurants that are NOT removed (for general browsing)
     List<Restaurant> findByStatusNot(RestaurantStatus status);
 
+    // Inside RestaurantRepository.java
     Page<Restaurant> findByStatus(RestaurantStatus status, Pageable pageable);
 
     Page<Restaurant> findAll(Pageable pageable);
@@ -33,6 +34,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
     // Find featured restaurants that are active
     List<Restaurant> findByIsFeaturedTrueAndStatus(RestaurantStatus status);
 
+    // Spring Data JPA needs this specific Pageable to handle the SQL "LIMIT" and "OFFSET"
     Page<Restaurant> findByProviderIdAndStatusAndStatusNot(
             Long providerId,
             RestaurantStatus status,
@@ -45,5 +47,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
             RestaurantStatus excludeStatus,
             Pageable pageable
     );
+
+    // In RestaurantRepository.java
 
 }

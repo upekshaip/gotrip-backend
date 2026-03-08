@@ -10,7 +10,12 @@ public record RestaurantBookingRequest(
         int personCount,
         String requestMessage,
         @JsonFormat(pattern = "yyyy-MM-dd")
-        LocalDate reservationDate,
+        LocalDate startingDate,
         @JsonFormat(pattern = "HH:mm")
-        LocalTime reservationTime
+        LocalTime startingTime,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        LocalDate endingDate,
+        @JsonFormat(pattern = "HH:mm")
+        LocalTime endingTime,
+        int roomCount
 ) {}

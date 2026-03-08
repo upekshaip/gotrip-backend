@@ -31,7 +31,7 @@ public class RestaurantReview {
     private Long travellerId;
 
     @Column(nullable = false, unique = true)
-    private Long bookingId; // Ensures one review per specific reservation
+    private Long bookingId; // Ensures one review per specific stay
 
     @Column(nullable = false)
     private int rating; // 1 to 5

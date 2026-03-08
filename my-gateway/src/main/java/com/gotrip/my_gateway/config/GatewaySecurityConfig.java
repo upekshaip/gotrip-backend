@@ -21,6 +21,7 @@ public class GatewaySecurityConfig {
                         .pathMatchers("/transport-service/**").permitAll()
                         .pathMatchers("/hotel-booking/**").permitAll()
                         .pathMatchers("/experience/**").permitAll()
+                        .pathMatchers("/restaurant-service/**").permitAll()
                         .anyExchange().authenticated()        // Gateway-level protection
                 )
                 .build();

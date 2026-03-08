@@ -27,6 +27,7 @@
         <module>experience-service</module>
         <module>my-gateway</module>
         <module>transport-service</module>
+        <module>restaurant-service</module>
 
     </modules>
 

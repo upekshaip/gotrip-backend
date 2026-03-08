@@ -25,7 +25,7 @@ public class GatewayConfig {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
         // allowNextJsFrontend
-        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3001"));
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         corsConfig.setAllowedHeaders(Arrays.asList("*"));
         corsConfig.setAllowCredentials(true);
@@ -57,6 +57,9 @@ public class GatewayConfig {
 
                 .route("experience_route", r -> r.path("/experience/**")
                         .uri("lb://experience-service"))
+
+                .route("restaurant_service_route", r -> r.path("/restaurant-service/**")
+                        .uri("lb://restaurant-service"))
                 .build();
     }
 

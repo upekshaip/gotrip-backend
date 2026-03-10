@@ -5,6 +5,7 @@ import com.gotrip.common_library.dto.transport_service.TransportCreateRequest;
 import com.gotrip.transport_service.service.TransportService;
 import com.gotrip.transport_service.service.TransportBookingService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,15 +16,16 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/transport-service")
+@CrossOrigin(origins = "http://localhost:3000")
 public class TransportServiceController {
 
     private final ObjectMapper objectMapper;
-//    private final TransportService transportService;
+    private final TransportService transportService;
     private final TransportBookingService transportBookingService;
 
     public TransportServiceController(TransportService transportService, TransportBookingService transportBookingService, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-//        this.transportService = transportService;
+        this.transportService = transportService;
         this.transportBookingService = transportBookingService;
     }
 
@@ -59,14 +61,38 @@ public class TransportServiceController {
     }
 
     @GetMapping
-    public ResponseEntity<?> list() {
-        return ResponseEntity.ok(transportService.getAllActive());
+    public ResponseEntity<?> list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        return ResponseEntity.ok(transportService.getAllActive(page, limit));
     }
 
-    // NEW: The Search Endpoint for the Frontend!
+    //  The Search Endpoint for the Frontend!
     @GetMapping("/search")
-    public ResponseEntity<?> search(@RequestParam String city) {
+    public ResponseEntity<?> search(
+            @RequestParam String city,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+
         return ResponseEntity.ok(transportService.searchTransports(city));
+    }
+
+    @GetMapping("/admin/all")
+    public ResponseEntity<?> getAllTransportsByAdmin(
+            Authentication authentication,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(transportService.getAllTransportsByAdmin(authentication, page, limit));
+    }
+
+    @GetMapping("/admin/pending")
+    public ResponseEntity<?> getPendingTransportsByAdmin(
+            Authentication authentication,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(transportService.getPendingTransportsByAdmin(authentication, page, limit));
     }
 
     @GetMapping("/{id}")

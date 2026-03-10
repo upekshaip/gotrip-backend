@@ -8,9 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/transport-bookings")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class TransportBookingController {
 
     private final TransportBookingService bookingService;
@@ -45,13 +47,21 @@ public class TransportBookingController {
 
     // Get all bookings for the logged-in Traveler
     @GetMapping("/my-bookings")
-    public ResponseEntity<?> getMyBookings(Authentication auth) {
-        return ResponseEntity.ok(bookingService.getMyBookings(auth));
+    public ResponseEntity<?> getMyBookings(
+            @RequestParam(required = false) BookingStatus status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            Authentication auth) {
+        return ResponseEntity.ok(bookingService.getMyBookings(status, page, limit, auth));
     }
 
     //  Get all incoming requests for the logged-in Provider
     @GetMapping("/provider-requests")
-    public ResponseEntity<?> getProviderRequests(Authentication auth) {
-        return ResponseEntity.ok(bookingService.getProviderBookings(auth));
+    public ResponseEntity<?> getProviderRequests(
+            @RequestParam(required = false) BookingStatus status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            Authentication auth) {
+        return ResponseEntity.ok(bookingService.getProviderBookings(status, page, limit, auth));
     }
 }

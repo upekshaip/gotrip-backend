@@ -25,6 +25,8 @@ public interface TransportRepository extends JpaRepository<Transport, Long> {
     // Find transports for a specific city that are ACTIVE
     List<Transport> findByCityIgnoreCaseAndStatus(String city, TransportStatus status);
 
+    Page<Transport> findByCityIgnoreCaseAndStatus(String city, TransportStatus status, Pageable pageable);
+
     // Find all transports owned by a specific provider
     List<Transport> findByProviderIdAndStatusNot(Long providerId, TransportStatus status);
 

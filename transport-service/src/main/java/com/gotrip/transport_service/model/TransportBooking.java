@@ -45,7 +45,7 @@ public class TransportBooking {
     @Column(nullable = false)
     private String dropoffLocation;
 
-    @Column(nullable = false)
+    @Column
     private String requestMessage;
 
     @Column

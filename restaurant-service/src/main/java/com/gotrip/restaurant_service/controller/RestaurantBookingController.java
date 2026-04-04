@@ -46,6 +46,7 @@ public class RestaurantBookingController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit,
             Authentication auth) {
+        System.out.println("hit");
         return ResponseEntity.ok(bookingService.getTravellerBookings(status, page, limit, auth));
     }
 

@@ -64,6 +64,8 @@ public class GatewayConfig {
 
                 .route("restaurant_service_route", r -> r.path("/restaurant-service/**")
                         .uri("lb://restaurant-service"))
+                .route("restaurant_booking_route", r -> r.path("/restaurant-booking/**")
+                        .uri("lb://restaurant-service"))
                 .build();
     }
 

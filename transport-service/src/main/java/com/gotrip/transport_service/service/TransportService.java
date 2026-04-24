@@ -150,5 +150,7 @@ public class TransportService {
         transport.setCapacity(req.capacity());
         transport.setImageUrl(req.imageUrl());
         transport.setFeatured(req.isFeatured());
+        transport.setLatitude(req.latitude() != null ? req.latitude() : 0.0);
+        transport.setLongitude(req.longitude() != null ? req.longitude() : 0.0);
     }
 }

@@ -58,10 +58,10 @@ public class Transport {
 
     // Base Location Coordinates
     @Column(nullable = false)
-    private Double latitude;
+    private Double latitude = 1.5;
 
     @Column(nullable = false)
-    private Double longitude;
+    private Double longitude = 1.5;
 
     @Column(nullable = false)
     private boolean isFeatured = false;
